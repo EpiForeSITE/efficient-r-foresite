@@ -1,0 +1,33 @@
+project:
+  type: website
+  output-dir: 'docs'
+  
+
+website:
+  title: "Efficient Programming with R: A Workshop"
+  body-footer: <text style="text-align:center">ForeSITE</text>
+  repo-url: https://github.com/EpiForeSITE/efficient-r-foresite
+  repo-actions: [edit, source]
+  navbar:
+    logo: logo.png
+    left:
+      - href: index.qmd
+        text: Home
+      - program.qmd
+      - participants.qmd
+    right:
+      - text: Git
+        menu: 
+        - href: git/slides.qmd
+          text: Intro to Git slides
+        - href: git/lab.qmd
+          text: Intro to Git lab
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+
+execute: 
+  freeze: auto

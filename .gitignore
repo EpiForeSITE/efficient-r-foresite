@@ -1,0 +1,7 @@
+/.quarto/
+.Rproj.user
+*.Rproj
+_freeze
+
+*_cache/
+_extensions/

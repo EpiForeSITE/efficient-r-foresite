@@ -1,0 +1,55 @@
+---
+title: "Welcome!"
+date: 2025-07-09
+date-modified: 2025-07-09
+---
+
+![Attendees during the morning session led by Andrew Redd (Photo by George G Vega Yon)](live.png){width=80%}
+
+## About the workshop
+
+Efficient programming is crucial for working with large datasets and complex analyses in R. This half-day workshop is designed to teach practical techniques for improving R code performance through vectorization, parallel computing, and specialized packages like data.table. Participants will learn how to identify bottlenecks in their code and apply appropriate optimization strategies to dramatically improve performance.
+
+
+### Time and location
+
+The workshop will take place on TBD. More details will be provided to registered attendees.
+
+### What are good use cases for efficient R programming?
+
+-	You work with large datasets that take a long time to process
+-	Your R scripts run slowly and you need to optimize performance
+-	You want to learn about vectorization techniques to replace slow loops
+-	You're interested in parallel computing to utilize multiple CPU cores
+-	You want to master data.table for fast data manipulation
+-	You need to process data that doesn't fit in memory efficiently
+-	You want to benchmark and profile your R code to identify bottlenecks
+
+### Who should attend?
+
+R programming users with intermediate experience who want to improve their code's performance. 
+
+### What level of programming should attendees have?
+
+Attendees should have solid experience using the R programming language, including writing functions, working with data frames, and basic data manipulation using tools like dplyr, base R, or data.table. Some familiarity with loops and apply functions would be helpful.
+
+
+### What tools will be used during the workshop?
+
+Besides the R programming language, we will be using RStudio. Participants should have R and RStudio installed on their laptops. We will also cover specialized packages including:
+
+- **data.table** for fast data manipulation
+- **parallel** for parallel computing
+- **microbenchmark** and **profvis** for performance measurement
+
+## Registration
+
+For registration, please reach out to your ForeSITE contact. You can also email us at <george.vegayon@utah.edu>.
+
+## Funding
+
+This workshop is organized by ForeSITE using funds from the CDC's Center for Forecasting and Outbreak Analytics (CFA) (Award number 1U01CK000585; 75D30121F00003).
+
+## AI Disclaimer
+
+This project contains AI-generated content. Particularly, via assistance (code completion and suggestions) using GitHub Copilot.
