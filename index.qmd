@@ -13,7 +13,7 @@ Efficient programming is crucial for working with large datasets and complex ana
 
 ### Time and location
 
-The workshop will take place on TBD. More details will be provided to registered attendees.
+The workshop will take place on Friday August 15th, 2025 at 9am-1pm MT. More details will be provided to registered attendees.
 
 ### What are good use cases for efficient R programming?
 
