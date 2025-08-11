@@ -719,5 +719,54 @@
     "title": "Lab 01 - GitHub",
     "section": "Footnotes",
     "text": "Footnotes\n\n\nThis lab was originally developed by George Vega Yon for USC’s Intro to Health Data Science.↩︎\nTeam members could be working on the same file but editing different lines of code. If this is the case, after pull/push, git will integrate the changes without conflicts.↩︎\nFor more details, take a look at the Forking Projects article in GitHub guides.↩︎\nMore info about how to deal with conflicts in this very neat post on stackoverflow.com How to resolve merge conflicts in Git. GitHub also has a way to solve conflicts in PRs, but this is only available to the admins of target repo. More info here,↩︎"
+  },
+  {
+    "objectID": "intro.html",
+    "href": "intro.html",
+    "title": "Fundamentals",
+    "section": "",
+    "text": "R code can be very efficient for typical tasks, but, as the code starts to increase in complexity, it is easy for it to become inefficient.\nSome quick R tips for efficient computing code:\n\nUse vectorized operations instead of loops.\nTry to use caching to avoid repeated calculations. Caching can also be done out of memory!\nAvoid unnecessary steps/data processing.\nReduce the number of copy operations.\nForeSITE"
+  },
+  {
+    "objectID": "intro.html#vectorized-operations",
+    "href": "intro.html#vectorized-operations",
+    "title": "Fundamentals",
+    "section": "Vectorized Operations",
+    "text": "Vectorized Operations\nVectorization can mean many things in programming, but in R, vectorization refers to using functions over vectors. For instance, instead of using a loop to add two vectors together, you can use the + operator directly on the vectors:\n\n# Using a loop\nset.seed(331)\na &lt;- runif(1e3)\nb &lt;- runif(1e3)\nresult &lt;- numeric(length(a))\nfor (i in seq_along(a)) {\n  result[i] &lt;- a[i] + b[i]\n}\n\n# Using vectorized operation\nresult &lt;- a + b\n\nWe can even bechmark the performance of these two approaches:\n\nlibrary(microbenchmark)\nmicrobenchmark(\n  loop = {\n    result &lt;- numeric(length(a))\n    for (i in seq_along(a)) {\n      result[i] &lt;- a[i] + b[i]\n    }\n  },\n  vectorized = {\n    result &lt;- a + b\n  },\n  unit = \"relative\"\n)\n\nUnit: relative\n       expr    min       lq     mean   median       uq      max neval\n       loop 2298.5 1456.107 968.8527 1268.147 735.8167 475.4851   100\n vectorized    1.0    1.000   1.0000    1.000   1.0000   1.0000   100\n\n\n\n\n\n\n\n\nTip\n\n\n\nFor-loops are not always bad. The main issue is with the code inside of the for-loop. If the code is already vectorized, then there’s no need to remove the for-loop (unless you can vectorize the for-loop itself)."
+  },
+  {
+    "objectID": "intro.html#caching-calculations",
+    "href": "intro.html#caching-calculations",
+    "title": "Fundamentals",
+    "section": "Caching calculations",
+    "text": "Caching calculations\nMany times, it is useful to cache calculations that are expensive to compute. For instance, if you have a function that takes a long time to run, you can store the result in a variable and reuse it later instead of recalculating it.\nHere is a bad example using the Fibonacci sequence:\n\nfibonacci &lt;- function(n) {\n  if (n &lt;= 1) {\n    return(n)\n  }\n  return(fibonacci(n - 1) + fibonacci(n - 2))\n}\n\nfibonacci_cached &lt;- function(n) {\n  prev &lt;- numeric(n + 1)\n  for (i in seq_len(n)) {\n    if (i &lt;= 1) {\n      prev[i + 1] &lt;- i\n    } else {\n      prev[i + 1] &lt;- prev[i] + prev[i - 1]\n    }\n  }\n\n  return(prev[n + 1])\n}\n\nBoth of these functions should return the same result, but the second is significantly faster as it avoids calling the function recursively:\n\nmicrobenchmark(\n  fibonacci(10),\n  fibonacci_cached(10),\n  times = 10,\n  unit = \"relative\",\n  check = \"equal\"\n)\n\nUnit: relative\n                 expr      min       lq     mean   median uq      max neval\n        fibonacci(10) 20.30769 20.65385 15.33051 19.63636 19 5.292453    10\n fibonacci_cached(10)  1.00000  1.00000  1.00000  1.00000  1 1.000000    10"
+  },
+  {
+    "objectID": "intro.html#avoiding-unnecessary-steps",
+    "href": "intro.html#avoiding-unnecessary-steps",
+    "title": "Fundamentals",
+    "section": "Avoiding unnecessary steps",
+    "text": "Avoiding unnecessary steps\nMany times, we can find shortcuts to reduce the amount of data processing we need to do. A great example is in the linear regression function lm(). The lm() function will go beyond finding the coefficients in a linear model, it will also compute residuals, fitted values, and more. Instead, we can use the function lm.fit() which only computes the coefficients:\n\nset.seed(331)\nx &lt;- rnorm(2e3)\ny &lt;- 2 + 3 * x + rnorm(2e3)\n\n# Comparing\nmicrobenchmark(\n  lm = coef(lm(y ~ x)),\n  lm_fit = coef(lm.fit(cbind(1, x), y)),\n  times = 10,\n  unit = \"relative\"\n)\n\nUnit: relative\n   expr      min       lq    mean median       uq      max neval\n     lm 4.522439 4.517442 5.63001 4.4596 4.671264 14.82414    10\n lm_fit 1.000000 1.000000 1.00000 1.0000 1.000000  1.00000    10"
+  },
+  {
+    "objectID": "intro.html#reducing-copy-operations",
+    "href": "intro.html#reducing-copy-operations",
+    "title": "Fundamentals",
+    "section": "Reducing copy operations",
+    "text": "Reducing copy operations\nLike in any programming language, copy operations in R can be expensive. Beyond increasing the amount of memory used, copy operations require tme to allocate memory and then copy the data. Modern R minimizes these by using copy-on-modify. This means that R will not copy an object until it is modified. For example, the following code makes multiple copies of X, but it is until the last line that R actually makes a copy of X:\n\nset.seed(331)\nX &lt;- runif(1e4)\nY &lt;- X\nZ &lt;- X\n\n# Checking the address of the objects\nlibrary(lobstr)\nobj_addr(X)\n## [1] \"0x138008000\"\nobj_addr(Y)\n## [1] \"0x138008000\"\nobj_addr(Z)\n## [1] \"0x138008000\"\n\nModifying X will trigger a copy operation, and the addresses of Y and Z will remain the same, while X will have a new address:\n\n# Modifying X\nX[1] &lt;- 100  # This is when R makes a copy of X\nobj_addr(X)\n## [1] \"0x1326b0000\"\nobj_addr(Y)\n## [1] \"0x138008000\"\nobj_addr(Z)\n## [1] \"0x138008000\""
+  },
+  {
+    "objectID": "intro.html#what-to-do",
+    "href": "intro.html#what-to-do",
+    "title": "Fundamentals",
+    "section": "What to do?",
+    "text": "What to do?\nHere is a diagram of how to proceed when trying to optimize your R code:\n\n\n\n\n\nflowchart LR\n    A((Start)) --&gt; B{Takes over a&lt;br&gt;few seconds?}\n    B -- Yes --&gt; C[Profile the code]\n    B -- No --&gt; D[Done]\n    C --&gt; E{Is it a bottleneck?}\n    E -- Yes --&gt; F[Optimize the code]\n    E -- No --&gt; D\n    F --&gt; G[Re-profile the code]\n    G --&gt; B"
+  },
+  {
+    "objectID": "intro.html#caching-calculations-bis",
+    "href": "intro.html#caching-calculations-bis",
+    "title": "Fundamentals",
+    "section": "Caching calculations (bis)",
+    "text": "Caching calculations (bis)\nIn the case of large calculations, we can also save results to the disk. For example, if we are running a simulation/computation, one per city/scenario, we can save the results to a file and read them later. Here is how to do it:\nFor each value of i, do the following:\n\nCheck if the file result_i.rds exists.\nIf it does not exist, run the computation and save the result to result_i.rds.\nIf it does exist, read the result from result_i.rds.\n\nAs simple as that! Here is an example using R code:\n\n# A complicated simulation function\nsimulate &lt;- function(i, seed) {\n  set.seed(seed)\n  rnorm(1e5)\n}\n\n# Generating seeds for each iteration\nset.seed(331)\nnsims &lt;- 100\nseeds &lt;- sample.int(.Machine$integer.max, nsims)\n\n# Just for this example, we will use a tempfile\nres_0 &lt;- vector(\"list\", length = nsims)\nfor (i in seq_len(nsims)) {\n  \n  # Creating the filename\n  fn &lt;- file.path(tempdir(), paste0(i, \".rds\"))\n\n  # Does the result already exist?\n  if (file.exists(fn))\n    res_0[[i]] &lt;- readRDS(fn)\n  else {\n    # If not, run the simulation and save the result\n    res_0[[i]] &lt;- simulate(i, seed = i)\n    saveRDS(res_0[[i]], fn)\n  }\n\n}\n\n\n\n\n\n\n\nTip\n\n\n\nWhen running simulations, it is a good pracitice to set individual seeds for each simulation (if these are individually complex). That way, if the code fails, you can rerun only the failed simulations without having to redo all of them.\n\n\nFurthermore, it is a good idea to wrap your code in a tryCatch() call to handle errors gracefully. This way, if a simulation fails, you can log the error and continue with the next simulation without stopping the entire process.\n\n# Just for this example, we will use a tempfile\nres_0 &lt;- vector(\"list\", length = nsims)\nfor (i in seq_len(nsims)) {\n  \n  # Creating the filename\n  fn &lt;- file.path(tempdir(), paste0(i, \".rds\"))\n\n  # Does the result already exist?\n  res &lt;- tryCatch({\n    if (file.exists(fn))\n      readRDS(fn)\n    else {\n      # If not, run the simulation and save the result\n      ans_i &lt;- simulate(i, seed = i)\n      saveRDS(ans_i, fn)\n      ans_i\n    }\n  }, error = function(e) e)\n\n  if (inherits(res, \"error\")) {\n    message(\"Simulation \", i, \" failed: \", res$message)\n    next  # Skip to the next iteration\n  }\n\n  # We still store it, even if it failed\n  res_0[[i]] &lt;- res\n\n}"
   }
 ]
