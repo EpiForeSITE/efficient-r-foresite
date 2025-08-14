@@ -6,9 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
-<meta name="dcterms.date" content="2025-07-09">
 
-<title>Welcome! – Efficient Programming with R: A Workshop</title>
+<title>The data.table R package – Efficient Programming with R: A Workshop</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -20,6 +19,40 @@ ul.task-list li input[type="checkbox"] {
   width: 0.8em;
   margin: 0 0.8em 0.2em -1em; /* quarto-specific, see https://github.com/quarto-dev/quarto-cli/issues/4556 */ 
   vertical-align: middle;
+}
+/* CSS for syntax highlighting */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { display: inline-block; text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+  }
+pre.numberSource { margin-left: 3em;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
 }
 </style>
 
@@ -93,29 +126,36 @@ ul.task-list li input[type="checkbox"] {
           <div class="collapse navbar-collapse" id="navbarCollapse">
             <ul class="navbar-nav navbar-nav-scroll me-auto">
   <li class="nav-item">
-    <a class="nav-link active" href="./index.html" aria-current="page"> 
+    <a class="nav-link" href="./index.html"> 
 <span class="menu-text">Home</span></a>
   </li>  
   <li class="nav-item">
     <a class="nav-link" href="./program.html"> 
 <span class="menu-text">Program</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./data.table.html"> 
-<span class="menu-text">The <code>data.table</code> R package</span></a>
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-contents" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Contents</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-contents">    
+        <li>
+    <a class="dropdown-item" href="./intro.html">
+ <span class="dropdown-text">Introduction</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./parallel.html"> 
-<span class="menu-text">Parallel computing with R</span></a>
+        <li>
+    <a class="dropdown-item" href="./data.table.html">
+ <span class="dropdown-text">The data.table R package</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./parallel_pkg.html"> 
-<span class="menu-text">The parallel R package</span></a>
+        <li>
+    <a class="dropdown-item" href="./parallel.html">
+ <span class="dropdown-text">Parallel Computing</span></a>
   </li>  
-  <li class="nav-item">
-    <a class="nav-link" href="./intro.html"> 
-<span class="menu-text">Fundamentals</span></a>
+        <li>
+    <a class="dropdown-item" href="./parallel_pkg.html">
+ <span class="dropdown-text">Parallel Packages</span></a>
   </li>  
+    </ul>
+  </li>
 </ul>
             <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
@@ -153,26 +193,17 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#about-the-workshop" id="toc-about-the-workshop" class="nav-link active" data-scroll-target="#about-the-workshop">About the workshop</a>
-  <ul class="collapse">
-  <li><a href="#time-and-location" id="toc-time-and-location" class="nav-link" data-scroll-target="#time-and-location">Time and location</a></li>
-  <li><a href="#what-are-good-use-cases-for-efficient-r-programming" id="toc-what-are-good-use-cases-for-efficient-r-programming" class="nav-link" data-scroll-target="#what-are-good-use-cases-for-efficient-r-programming">What are good use cases for efficient R programming?</a></li>
-  <li><a href="#who-should-attend" id="toc-who-should-attend" class="nav-link" data-scroll-target="#who-should-attend">Who should attend?</a></li>
-  <li><a href="#what-level-of-programming-should-attendees-have" id="toc-what-level-of-programming-should-attendees-have" class="nav-link" data-scroll-target="#what-level-of-programming-should-attendees-have">What level of programming should attendees have?</a></li>
-  <li><a href="#what-tools-will-be-used-during-the-workshop" id="toc-what-tools-will-be-used-during-the-workshop" class="nav-link" data-scroll-target="#what-tools-will-be-used-during-the-workshop">What tools will be used during the workshop?</a></li>
-  </ul></li>
-  <li><a href="#registration" id="toc-registration" class="nav-link" data-scroll-target="#registration">Registration</a></li>
-  <li><a href="#funding" id="toc-funding" class="nav-link" data-scroll-target="#funding">Funding</a></li>
-  <li><a href="#ai-disclaimer" id="toc-ai-disclaimer" class="nav-link" data-scroll-target="#ai-disclaimer">AI Disclaimer</a></li>
+  <li><a href="#reading-and-writing-data" id="toc-reading-and-writing-data" class="nav-link active" data-scroll-target="#reading-and-writing-data">Reading and Writing Data</a></li>
+  <li><a href="#example-data-manipulation" id="toc-example-data-manipulation" class="nav-link" data-scroll-target="#example-data-manipulation">Example data manipulation</a></li>
   </ul>
-<div class="toc-actions"><ul><li><a href="https://github.com/EpiForeSITE/efficient-r-foresite/edit/main/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/EpiForeSITE/efficient-r-foresite/blob/main/index.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
+<div class="toc-actions"><ul><li><a href="https://github.com/EpiForeSITE/efficient-r-foresite/edit/main/data.table.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/EpiForeSITE/efficient-r-foresite/blob/main/data.table.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
     </div>
 <!-- main -->
 <main class="content" id="quarto-document-content">
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Welcome!</h1>
+<h1 class="title">The data.table R package</h1>
 </div>
 
 
@@ -180,19 +211,7 @@ ul.task-list li input[type="checkbox"] {
 <div class="quarto-title-meta">
 
     
-    <div>
-    <div class="quarto-title-meta-heading">Published</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date">July 9, 2025</p>
-    </div>
-  </div>
   
-    <div>
-    <div class="quarto-title-meta-heading">Modified</div>
-    <div class="quarto-title-meta-contents">
-      <p class="date-modified">July 9, 2025</p>
-    </div>
-  </div>
     
   </div>
   
@@ -201,60 +220,158 @@ ul.task-list li input[type="checkbox"] {
 </header>
 
 
-<div class="quarto-figure quarto-figure-center">
+<p>For most cases, the most proper data wrangling tool in R is the <a href="https://cran.r-project.org/package=dplyr"><code>dplyr</code></a> package. Nonetheless, when dealing with large amounts of data, the <a href="https://cran.r-project.org/package=data.table"><code>data.table</code></a> package is the fastest alternative available for doing data processing within R (see the <a href="https://duckdblabs.github.io/db-benchmark/" target="_blank">benchmarks</a>).</p>
+<section id="reading-and-writing-data" class="level2">
+<h2 class="anchored" data-anchor-id="reading-and-writing-data">Reading and Writing Data</h2>
+<p>Reading and writing operations with <code>data.table</code>’s <code>fread</code> and <code>fwrite</code> are highly optimized. Here is a benchmark we can do on our own:</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr) <span class="co"># tidyverse's</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(data.table)</span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(microbenchmark)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a><span class="co"># Generating a large dataset of random numbers</span></span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1231</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>x <span class="ot">&lt;-</span> <span class="fu">runif</span>(<span class="fl">5e4</span> <span class="sc">*</span> <span class="dv">10</span>) <span class="sc">|&gt;</span> <span class="fu">matrix</span>(<span class="at">ncol =</span> <span class="dv">10</span>) <span class="sc">|&gt;</span> <span class="fu">data.frame</span>()</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Creating tempfiles</span></span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true" tabindex="-1"></a>temp_dt <span class="ot">&lt;-</span> <span class="fu">tempfile</span>(<span class="at">fileext =</span> <span class="st">".csv"</span>)</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true" tabindex="-1"></a>temp_tv <span class="ot">&lt;-</span> <span class="fu">tempfile</span>(<span class="at">fileext =</span> <span class="st">".csv"</span>)</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true" tabindex="-1"></a>temp_r  <span class="ot">&lt;-</span> <span class="fu">tempfile</span>(<span class="at">fileext =</span> <span class="st">".csv"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>bm <span class="ot">&lt;-</span> <span class="fu">microbenchmark</span>(</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="at">readr      =</span> <span class="fu">write_csv</span>(x, temp_tv, <span class="at">num_threads =</span> <span class="dv">1</span>L, <span class="at">progress =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="at">data.table =</span> <span class="fu">fwrite</span>(</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    x, temp_dt, <span class="at">verbose =</span> <span class="cn">FALSE</span>, <span class="at">nThread =</span> <span class="dv">1</span>L,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">showProgress =</span> <span class="cn">FALSE</span>),</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">base       =</span> <span class="fu">write.csv</span>(x, temp_r),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>  <span class="at">times =</span> <span class="dv">20</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in microbenchmark(readr = write_csv(x, temp_tv, num_threads = 1L, :
+less accurate nanosecond times to avoid potential integer overflows</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>bm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Unit: milliseconds
+       expr       min        lq      mean    median        uq      max neval
+      readr  20.50656  20.85293  32.74184  22.92738  28.40509 192.2000    20
+ data.table  21.73935  23.39716  25.49071  24.40361  25.86483  32.4754    20
+       base 219.56336 230.62471 239.80889 240.37378 247.95769 260.8928    20</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co"># We can also visualize it</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>bm <span class="sc">|&gt;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(</span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">log =</span> <span class="st">"y"</span>,</span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">ylab =</span> <span class="st">"Time (ms) (log10-scale)"</span>,</span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">main =</span> <span class="st">"CSV Writing Benchmark"</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
 <figure class="figure">
-<p><img src="live.png" class="img-fluid figure-img" style="width:80.0%"></p>
-<figcaption>Attendees during the morning session led by Andrew Redd (Photo by George G Vega Yon)</figcaption>
+<p><img src="data.table_files/figure-html/read-write-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
-<section id="about-the-workshop" class="level2">
-<h2 class="anchored" data-anchor-id="about-the-workshop">About the workshop</h2>
-<p>Efficient programming is crucial for working with large datasets and complex analyses in R. This half-day workshop is designed to teach practical techniques for improving R code performance through vectorization, parallel computing, and specialized packages like data.table. Participants will learn how to identify bottlenecks in their code and apply appropriate optimization strategies to dramatically improve performance.</p>
-<section id="time-and-location" class="level3">
-<h3 class="anchored" data-anchor-id="time-and-location">Time and location</h3>
-<p>The workshop will take place on Friday August 15th, 2025 at 9am-1pm MT. More details will be provided to registered attendees.</p>
+</div>
+</div>
+<p>The same thing applies when reading data</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb7"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Writing the data</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="fu">fwrite</span>(x, temp_r, <span class="at">verbose =</span> <span class="cn">FALSE</span>, <span class="at">nThread =</span> <span class="dv">1</span>L, <span class="at">showProgress =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co"># Benchmarking</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a>bm <span class="ot">&lt;-</span> <span class="fu">microbenchmark</span>(</span>
+<span id="cb7-6"><a href="#cb7-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">readr      =</span> <span class="fu">read_csv</span>(</span>
+<span id="cb7-7"><a href="#cb7-7" aria-hidden="true" tabindex="-1"></a>    temp_r, <span class="at">progress =</span> <span class="cn">FALSE</span>, <span class="at">num_threads =</span> <span class="dv">1</span>L,</span>
+<span id="cb7-8"><a href="#cb7-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">show_col_types =</span> <span class="cn">FALSE</span></span>
+<span id="cb7-9"><a href="#cb7-9" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb7-10"><a href="#cb7-10" aria-hidden="true" tabindex="-1"></a>  <span class="at">data.table =</span> <span class="fu">fread</span>(</span>
+<span id="cb7-11"><a href="#cb7-11" aria-hidden="true" tabindex="-1"></a>    temp_r, <span class="at">verbose =</span> <span class="cn">FALSE</span>, <span class="at">nThread =</span> <span class="dv">1</span>L,</span>
+<span id="cb7-12"><a href="#cb7-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">showProgress =</span> <span class="cn">FALSE</span></span>
+<span id="cb7-13"><a href="#cb7-13" aria-hidden="true" tabindex="-1"></a>    ),</span>
+<span id="cb7-14"><a href="#cb7-14" aria-hidden="true" tabindex="-1"></a>  <span class="at">base       =</span> <span class="fu">read.csv</span>(temp_r),</span>
+<span id="cb7-15"><a href="#cb7-15" aria-hidden="true" tabindex="-1"></a>  <span class="at">times =</span> <span class="dv">10</span></span>
+<span id="cb7-16"><a href="#cb7-16" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>Warning in microbenchmark(readr = read_csv(temp_r, progress = FALSE,
+num_threads = 1L, : less accurate nanosecond times to avoid potential integer
+overflows</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>bm</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Unit: milliseconds
+       expr        min        lq      mean    median        uq      max neval
+      readr  37.631276  38.50851  46.13079  39.05629  40.32838 109.9365    10
+ data.table   9.598879  10.13672  17.68502  10.47573  20.14621  55.4172    10
+       base 166.714323 191.63904 214.94111 205.02200 225.25822 337.7869    10</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>bm <span class="sc">|&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot</span>(</span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>    <span class="at">log =</span> <span class="st">"y"</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a>    <span class="at">ylab =</span> <span class="st">"Time (ms) (log10-scale)"</span>,</span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">main =</span> <span class="st">"CSV Reading Benchmark"</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>  )</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="data.table_files/figure-html/read-benchmark-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Under the hood, the <code>readr</code> package uses the <a href="https://vroom.r-lib.org/" target="_blank"><code>vroom</code></a> package. Nonetheless, there are some operations (dealing with character data mostly), where the <code>vroom</code> package shines. Regardless, <code>data.table</code> is a perfect alternative as it goes beyond just reading/writing data.</p>
 </section>
-<section id="what-are-good-use-cases-for-efficient-r-programming" class="level3">
-<h3 class="anchored" data-anchor-id="what-are-good-use-cases-for-efficient-r-programming">What are good use cases for efficient R programming?</h3>
-<ul>
-<li>You work with large datasets that take a long time to process</li>
-<li>Your R scripts run slowly and you need to optimize performance</li>
-<li>You want to learn about vectorization techniques to replace slow loops</li>
-<li>You’re interested in parallel computing to utilize multiple CPU cores</li>
-<li>You want to master data.table for fast data manipulation</li>
-<li>You need to process data that doesn’t fit in memory efficiently</li>
-<li>You want to benchmark and profile your R code to identify bottlenecks</li>
-</ul>
-</section>
-<section id="who-should-attend" class="level3">
-<h3 class="anchored" data-anchor-id="who-should-attend">Who should attend?</h3>
-<p>R programming users with intermediate experience who want to improve their code’s performance.</p>
-</section>
-<section id="what-level-of-programming-should-attendees-have" class="level3">
-<h3 class="anchored" data-anchor-id="what-level-of-programming-should-attendees-have">What level of programming should attendees have?</h3>
-<p>Attendees should have solid experience using the R programming language, including writing functions, working with data frames, and basic data manipulation using tools like dplyr, base R, or data.table. Some familiarity with loops and apply functions would be helpful.</p>
-</section>
-<section id="what-tools-will-be-used-during-the-workshop" class="level3">
-<h3 class="anchored" data-anchor-id="what-tools-will-be-used-during-the-workshop">What tools will be used during the workshop?</h3>
-<p>Besides the R programming language, we will be using RStudio. Participants should have R and RStudio installed on their laptops. We will also cover specialized packages including:</p>
-<ul>
-<li><strong>data.table</strong> for fast data manipulation</li>
-<li><strong>parallel</strong> for parallel computing</li>
-<li><strong>microbenchmark</strong> and <strong>profvis</strong> for performance measurement</li>
-</ul>
-</section>
-</section>
-<section id="registration" class="level2">
-<h2 class="anchored" data-anchor-id="registration">Registration</h2>
-<p>For registration, please reach out to your ForeSITE contact. You can also email us at <a href="mailto:george.vegayon@utah.edu" class="email">george.vegayon@utah.edu</a>.</p>
-</section>
-<section id="funding" class="level2">
-<h2 class="anchored" data-anchor-id="funding">Funding</h2>
-<p>This workshop is organized by ForeSITE using funds from the CDC’s Center for Forecasting and Outbreak Analytics (CFA) (Award number 1U01CK000585; 75D30121F00003).</p>
-</section>
-<section id="ai-disclaimer" class="level2">
-<h2 class="anchored" data-anchor-id="ai-disclaimer">AI Disclaimer</h2>
-<p>This project contains AI-generated content. Particularly, via assistance (code completion and suggestions) using GitHub Copilot.</p>
+<section id="example-data-manipulation" class="level2">
+<h2 class="anchored" data-anchor-id="example-data-manipulation">Example data manipulation</h2>
+<p><code>data.table</code> is also the fastest for data manipulation. Here are a couple of examples aggregating data with data table vs dplyr</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a>input <span class="ot">&lt;-</span> <span class="cf">if</span> (<span class="fu">file.exists</span>(<span class="st">"flights14.csv"</span>)) {</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>   <span class="st">"flights14.csv"</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>} <span class="cf">else</span> {</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="st">"https://raw.githubusercontent.com/Rdatatable/data.table/master/vignettes/flights14.csv"</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a><span class="co"># Reading the data</span></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>flights_dt <span class="ot">&lt;-</span> <span class="fu">fread</span>(input)</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>flights_tb <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(input, <span class="at">show_col_types =</span> <span class="cn">FALSE</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>
+Attaching package: 'dplyr'</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:data.table':
+
+    between, first, last</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:stats':
+
+    filter, lag</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>The following objects are masked from 'package:base':
+
+    intersect, setdiff, setequal, union</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co"># To avoid some messaging from the function</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="fu">options</span>(<span class="at">dplyr.summarise.inform =</span> <span class="cn">FALSE</span>)</span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a><span class="fu">microbenchmark</span>(</span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="at">data.table =</span> flights_dt[, .N, <span class="at">by =</span> .(origin, dest)],</span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="at">dplyr =</span> flights_tb <span class="sc">|&gt;</span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>    <span class="fu">group_by</span>(origin, dest) <span class="sc">|&gt;</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>    <span class="fu">summarise</span>(<span class="at">n =</span> <span class="fu">n</span>())</span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Unit: milliseconds
+       expr      min       lq     mean   median       uq       max neval
+ data.table 1.546356 1.668229 2.193217 1.774050 1.972735  5.053373   100
+      dplyr 4.719141 4.880312 5.634190 4.976457 5.245601 33.803516   100</code></pre>
+</div>
+</div>
 
 
 </section>
@@ -682,4 +799,4 @@ window.document.addEventListener("DOMContentLoaded", function (event) {
 
 
 
-<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/EpiForeSITE/efficient-r-foresite/edit/main/index.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/EpiForeSITE/efficient-r-foresite/blob/main/index.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></div></div></footer></body></html>
+<footer class="footer"><div class="nav-footer"><div class="nav-footer-center"><div class="toc-actions d-sm-block d-md-none"><ul><li><a href="https://github.com/EpiForeSITE/efficient-r-foresite/edit/main/data.table.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/EpiForeSITE/efficient-r-foresite/blob/main/data.table.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></div></div></footer></body></html>

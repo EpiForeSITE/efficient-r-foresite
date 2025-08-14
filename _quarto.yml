@@ -13,14 +13,23 @@ website:
     left:
       - href: index.qmd
         text: Home
-      - program.qmd
-      - participants.qmd
+      - href: program.qmd
+      - text: Contents
+        menu:
+        - href: profiling.qmd
+        - href: data.table.qmd
+          text: The data.table R package
+        - href: parallel.qmd
+          text: Parallel Computing
+        - href: parallel_pkg.qmd
+          text: Parallel Packages
     right:
+      - participants.qmd
       - text: Git
         menu: 
-        - href: git/slides.qmd
+        - href: https://epiforesite.github.io/r-pkgs-workshop/git/slides.html
           text: Intro to Git slides
-        - href: git/lab.qmd
+        - href: https://epiforesite.github.io/r-pkgs-workshop/git/lab.html
           text: Intro to Git lab
 
 format:

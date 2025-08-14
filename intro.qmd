@@ -1,5 +1,5 @@
 ---
-title: Fundamentals
+title: Introduction
 ---
 
 - R code can be very efficient for typical tasks, but, as the code starts to increase in complexity, it is easy for it to become inefficient.

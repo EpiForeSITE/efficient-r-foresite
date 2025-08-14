@@ -1,8 +1,8 @@
 ---
-title: Using data.table
+title: The data.table R package
 ---
 
-For most cases, the most proper data wrangling tool in R is the `dplyr` package. Nonetheless, when dealing with large amounts of data, the `data.table` package is the fastest alternative available for doing data processing within R (see the [benchmarks](https://duckdblabs.github.io/db-benchmark/){target="_blank"}).
+For most cases, the most proper data wrangling tool in R is the [`dplyr`](https://cran.r-project.org/package=dplyr) package. Nonetheless, when dealing with large amounts of data, the [`data.table`](https://cran.r-project.org/package=data.table) package is the fastest alternative available for doing data processing within R (see the [benchmarks](https://duckdblabs.github.io/db-benchmark/){target="_blank"}).
 
 ## Reading and Writing Data
 
@@ -51,13 +51,17 @@ The same thing applies when reading data
 
 ```{r}
 #| label: read-benchmark
+# Writing the data
+fwrite(x, temp_r, verbose = FALSE, nThread = 1L, showProgress = FALSE)
+
+# Benchmarking
 bm <- microbenchmark(
   readr      = read_csv(
-    temp_tv, progress = FALSE, num_threads = 1L,
+    temp_r, progress = FALSE, num_threads = 1L,
     show_col_types = FALSE
     ),
   data.table = fread(
-    temp_dt, verbose = FALSE, nThread = 1L,
+    temp_r, verbose = FALSE, nThread = 1L,
     showProgress = FALSE
     ),
   base       = read.csv(temp_r),
