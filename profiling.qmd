@@ -16,6 +16,36 @@ Code profiling is a fundamental tool for programmers. With profiling, it is poss
 
 - **AI can give you good tips**: In my personal experience, AI can be useful doing code profiling too. This works better if you are using an [agentic AI](https://en.wikipedia.org/w/index.php?title=Agentic_AI&oldid=1305674453){target="_blank"}, as it is more likely to get good feedback from it (it will test the code for you).
 
+Here is a proposed workflow for profiling and optimizing your code in general
+
+## A proposed workflow
+
+Here is a formula to follow when doing code profiling/optimization:
+
+1. Ask yourself these questions before you jump into profiling:
+```{mermaid}
+flowchart LR
+  A((Start))-->B{Is it<br>slow?}
+  B-->|Yes|C{Are you<br>sure?}
+  B-->|Not really, it<br>just sounds cool...|D((End))
+  C-->|Maybe...|E{Takes more<br>than 1min?}
+
+  C-->|Yes|F{Is it<br>worth it?}
+  E-->|Yes|F
+  E-->|No|D
+
+  F-->|No, I'm<br>just bored<br>|D
+  F-->|Yes, my life<br>depends on it|G((Proceed with<br>optimization))
+```
+
+2. If you succeed, then ensure that the profiling is done in a finite time, this is, use a subset of the data to avoid having long waits. **Running the profiler will add overhead computing time, so try to keep it short (e.g., 1 minute)**.
+
+3. There may be many things that could be optimized, focus on what would deliver the highest impact. Could be a function that is only called once but takes a long time to execute, or a function that is called multiple times but is relatively fast.
+
+4. Before making any changes, ensure that you have a backup of your original code, as well as a copy of the current profiling results.
+
+5. Re-run the profiler and compare performance. If no changes are observed, then go back to step 2.
+
 ## Profiling code in R
 
 In the R programming language, the most used profiling tool comes with the [`profvis` package](https://cran.r-project.org/package=profvis). The package provides a wrapper of the `Rprof` function, which is a built-in R function for profiling code. The `profvis` package makes it easier to visualize the profiling results in a web-based interface.
@@ -58,7 +88,9 @@ The data visualization shows the distribution of time spent in each function. Us
 When developing R packages, it is a good idea to pair your `profvis::profvis` call with `devtools::load_all()` to ensure that all source code is available to the profiler. Otherwise, the flamegraph won't show your code (it will say "unavailable").
 :::
 
-## Exercise: Identifying the bottle neck
+## Exercise: Identifying the bottle neck[^bottleneck]
+
+[^bottleneck]: Code copied verbatim from the `profvis` R package [here](https://profvis.r-lib.org/articles/examples.html#example-2){target="_blank"}.
 
 ```{r}
 #| label: slow-code

@@ -17,12 +17,10 @@ website:
       - text: Contents
         menu:
         - href: profiling.qmd
+        - href: efficiency.qmd
         - href: data.table.qmd
-          text: The data.table R package
         - href: parallel.qmd
-          text: Parallel Computing
         - href: parallel_pkg.qmd
-          text: Parallel Packages
     right:
       - participants.qmd
       - text: Git

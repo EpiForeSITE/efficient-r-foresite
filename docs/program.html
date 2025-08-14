@@ -100,12 +100,39 @@ ul.task-list li input[type="checkbox"] {
     <a class="nav-link active" href="./program.html" aria-current="page"> 
 <span class="menu-text">Program</span></a>
   </li>  
+  <li class="nav-item dropdown ">
+    <a class="nav-link dropdown-toggle" href="#" id="nav-menu-contents" role="link" data-bs-toggle="dropdown" aria-expanded="false">
+ <span class="menu-text">Contents</span>
+    </a>
+    <ul class="dropdown-menu" aria-labelledby="nav-menu-contents">    
+        <li>
+    <a class="dropdown-item" href="./profiling.html">
+ <span class="dropdown-text">Profiling</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./efficiency.html">
+ <span class="dropdown-text">Writing efficient code</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./data.table.html">
+ <span class="dropdown-text">The data.table R package</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./parallel.html">
+ <span class="dropdown-text">Parallel computing with R</span></a>
+  </li>  
+        <li>
+    <a class="dropdown-item" href="./parallel_pkg.html">
+ <span class="dropdown-text">The parallel R package</span></a>
+  </li>  
+    </ul>
+  </li>
+</ul>
+            <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item">
     <a class="nav-link" href="./participants.html"> 
 <span class="menu-text">Participants</span></a>
   </li>  
-</ul>
-            <ul class="navbar-nav navbar-nav-scroll ms-auto">
   <li class="nav-item dropdown ">
     <a class="nav-link dropdown-toggle" href="#" id="nav-menu-git" role="link" data-bs-toggle="dropdown" aria-expanded="false">
  <span class="menu-text">Git</span>
@@ -137,7 +164,8 @@ ul.task-list li input[type="checkbox"] {
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#resources-and-git-materials" id="toc-resources-and-git-materials" class="nav-link active" data-scroll-target="#resources-and-git-materials">Resources and Git Materials</a></li>
+  <li><a href="#plan" id="toc-plan" class="nav-link active" data-scroll-target="#plan">Plan</a></li>
+  <li><a href="#resources-and-git-materials" id="toc-resources-and-git-materials" class="nav-link" data-scroll-target="#resources-and-git-materials">Resources and Git Materials</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/EpiForeSITE/efficient-r-foresite/edit/main/program.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/EpiForeSITE/efficient-r-foresite/blob/main/program.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
     </div>
@@ -176,7 +204,17 @@ ul.task-list li input[type="checkbox"] {
 
 
 <p>This half-day workshop will focus on practical techniques for writing efficient R code. Participants will learn about vectorization, parallel computing, and specialized packages to dramatically improve their R code performance. The session will include hands-on exercises and real-world examples.</p>
-<p>TBD</p>
+<section id="plan" class="level2">
+<h2 class="anchored" data-anchor-id="plan">Plan</h2>
+<p>The first hour and a half of the workshop will cover the following topics:</p>
+<ol type="1">
+<li><p>Profiling (<a href="./profiling.html">Profiling</a>)</p></li>
+<li><p>Writing efficient code (<a href="./efficiency.html">Efficiency</a>)</p></li>
+<li><p>The data.table package (<a href="./data.table.html">Data.Table</a>)</p></li>
+<li><p>Parallel computing in R (<a href="./parallel.html">Parallel computing in R</a> and the <a href="./parallel_pkg.html">parallel package</a>)</p></li>
+</ol>
+<p>The last hour will be dedicated to looking into the participants’ specific use cases and challenges, providing tailored advice and solutions. Much of the content will be driven by the participants’ needs and questions, and due to the time constraints, we will most likely skip some sections of the lectures.</p>
+</section>
 <section id="resources-and-git-materials" class="level2">
 <h2 class="anchored" data-anchor-id="resources-and-git-materials">Resources and Git Materials</h2>
 <p>The workshop will utilize materials from the <code>git</code> folder for version control best practices when working with performance-critical code. Additional resources and example datasets will be provided during the workshop.</p>

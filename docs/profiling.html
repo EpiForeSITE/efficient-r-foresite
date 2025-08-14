@@ -100,6 +100,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     "search-label": "Search"
   }
 }</script>
+<script src="site_libs/quarto-diagram/mermaid.min.js"></script>
+<script src="site_libs/quarto-diagram/mermaid-init.js"></script>
+<link href="site_libs/quarto-diagram/mermaid.css" rel="stylesheet">
 
 
 <link rel="stylesheet" href="styles.css">
@@ -143,16 +146,20 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
  <span class="dropdown-text">Profiling</span></a>
   </li>  
         <li>
+    <a class="dropdown-item" href="./efficiency.html">
+ <span class="dropdown-text">Writing efficient code</span></a>
+  </li>  
+        <li>
     <a class="dropdown-item" href="./data.table.html">
  <span class="dropdown-text">The data.table R package</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="./parallel.html">
- <span class="dropdown-text">Parallel Computing</span></a>
+ <span class="dropdown-text">Parallel computing with R</span></a>
   </li>  
         <li>
     <a class="dropdown-item" href="./parallel_pkg.html">
- <span class="dropdown-text">Parallel Packages</span></a>
+ <span class="dropdown-text">The parallel R package</span></a>
   </li>  
     </ul>
   </li>
@@ -193,8 +200,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
     <h2 id="toc-title">On this page</h2>
    
   <ul>
-  <li><a href="#profiling-code-in-r" id="toc-profiling-code-in-r" class="nav-link active" data-scroll-target="#profiling-code-in-r">Profiling code in R</a></li>
-  <li><a href="#exercise-identifying-the-bottle-neck" id="toc-exercise-identifying-the-bottle-neck" class="nav-link" data-scroll-target="#exercise-identifying-the-bottle-neck">Exercise: Identifying the bottle neck</a></li>
+  <li><a href="#a-proposed-workflow" id="toc-a-proposed-workflow" class="nav-link active" data-scroll-target="#a-proposed-workflow">A proposed workflow</a></li>
+  <li><a href="#profiling-code-in-r" id="toc-profiling-code-in-r" class="nav-link" data-scroll-target="#profiling-code-in-r">Profiling code in R</a></li>
+  <li><a href="#exercise-identifying-the-bottle-neckbottleneck" id="toc-exercise-identifying-the-bottle-neckbottleneck" class="nav-link" data-scroll-target="#exercise-identifying-the-bottle-neckbottleneck">Exercise: Identifying the bottle neck</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/EpiForeSITE/efficient-r-foresite/edit/main/profiling.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/EpiForeSITE/efficient-r-foresite/blob/main/profiling.qmd" class="toc-action"><i class="bi empty"></i>View source</a></li></ul></div></nav>
     </div>
@@ -229,6 +237,43 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <li><p><strong>Be strategic</strong>: Not everything needs to be optimized. Focus on the parts of the code that are critical for performance and user experience. You can think of it in terms of how much time the program/user spends on each bit.</p></li>
 <li><p><strong>AI can give you good tips</strong>: In my personal experience, AI can be useful doing code profiling too. This works better if you are using an <a href="https://en.wikipedia.org/w/index.php?title=Agentic_AI&amp;oldid=1305674453" target="_blank">agentic AI</a>, as it is more likely to get good feedback from it (it will test the code for you).</p></li>
 </ul>
+<p>Here is a proposed workflow for profiling and optimizing your code in general</p>
+<section id="a-proposed-workflow" class="level2">
+<h2 class="anchored" data-anchor-id="a-proposed-workflow">A proposed workflow</h2>
+<p>Here is a formula to follow when doing code profiling/optimization:</p>
+<ol type="1">
+<li>Ask yourself these questions before you jump into profiling:</li>
+</ol>
+<div class="cell" data-layout-align="default">
+<div class="cell-output-display">
+<div>
+<p></p><figure class="figure"><p></p>
+<div>
+<pre class="mermaid mermaid-js">flowchart LR
+  A((Start))--&gt;B{Is it&lt;br&gt;slow?}
+  B--&gt;|Yes|C{Are you&lt;br&gt;sure?}
+  B--&gt;|Not really, it&lt;br&gt;just sounds cool...|D((End))
+  C--&gt;|Maybe...|E{Takes more&lt;br&gt;than 1min?}
+
+  C--&gt;|Yes|F{Is it&lt;br&gt;worth it?}
+  E--&gt;|Yes|F
+  E--&gt;|No|D
+
+  F--&gt;|No, I'm&lt;br&gt;just bored&lt;br&gt;|D
+  F--&gt;|Yes, my life&lt;br&gt;depends on it|G((Proceed with&lt;br&gt;optimization))
+</pre>
+</div>
+<p></p></figure><p></p>
+</div>
+</div>
+</div>
+<ol start="2" type="1">
+<li><p>If you succeed, then ensure that the profiling is done in a finite time, this is, use a subset of the data to avoid having long waits. <strong>Running the profiler will add overhead computing time, so try to keep it short (e.g., 1 minute)</strong>.</p></li>
+<li><p>There may be many things that could be optimized, focus on what would deliver the highest impact. Could be a function that is only called once but takes a long time to execute, or a function that is called multiple times but is relatively fast.</p></li>
+<li><p>Before making any changes, ensure that you have a backup of your original code, as well as a copy of the current profiling results.</p></li>
+<li><p>Re-run the profiler and compare performance. If no changes are observed, then go back to step 2.</p></li>
+</ol>
+</section>
 <section id="profiling-code-in-r" class="level2">
 <h2 class="anchored" data-anchor-id="profiling-code-in-r">Profiling code in R</h2>
 <p>In the R programming language, the most used profiling tool comes with the <a href="https://cran.r-project.org/package=profvis"><code>profvis</code> package</a>. The package provides a wrapper of the <code>Rprof</code> function, which is a built-in R function for profiling code. The <code>profvis</code> package makes it easier to visualize the profiling results in a web-based interface.</p>
@@ -264,8 +309,8 @@ Tip
 </div>
 </div>
 </section>
-<section id="exercise-identifying-the-bottle-neck" class="level2">
-<h2 class="anchored" data-anchor-id="exercise-identifying-the-bottle-neck">Exercise: Identifying the bottle neck</h2>
+<section id="exercise-identifying-the-bottle-neckbottleneck" class="level2">
+<h2 class="anchored" data-anchor-id="exercise-identifying-the-bottle-neckbottleneck">Exercise: Identifying the bottle neck<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a></h2>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co"># Generate data</span></span>
 <span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>times <span class="ot">&lt;-</span> <span class="fl">4e5</span></span>
@@ -298,7 +343,13 @@ Tip
 
 </section>
 
-<p><text style="text-align:center">ForeSITE</text></p></main> <!-- /main -->
+
+<p><text style="text-align:center">ForeSITE</text></p><div id="quarto-appendix" class="default"><section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes"><h2 class="anchored quarto-appendix-heading">Footnotes</h2>
+
+<ol>
+<li id="fn1"><p>Code copied verbatim from the <code>profvis</code> R package <a href="https://profvis.r-lib.org/articles/examples.html#example-2" target="_blank">here</a>.<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+</ol>
+</section></div></main> <!-- /main -->
 <script id="quarto-html-after-body" type="application/javascript">
 window.document.addEventListener("DOMContentLoaded", function (event) {
   const toggleBodyColorMode = (bsSheetEl) => {
