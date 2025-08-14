@@ -1,0 +1,241 @@
+---
+title: The parallel R package
+author: George G. Vega Yon, Ph.D.
+date: 2025-08-14
+---
+
+::: {.callout-note}
+This content was originally published in the book "Applied HPC with R" by George G. Vega Yon, Ph.D. You can find the book at <https://book-hpc.ggvy.cl>
+:::
+
+Although R was not built for parallel computing, multiple ways of parallelizing your R code exist. One of these is the `parallel` package. This R package, shipped with base R, provides various functions to parallelize R code using [embarrassingly parallel computing](https://en.wikipedia.org/w/index.php?title=Embarrassingly_parallel&oldid=1136401514){target="_blank"}, i.e., a divide-and-conquer-type strategy. The basic idea is to start multiple R sessions (usually called child processes), connect the main session with those, and send them instructions. This section goes over a common workflow to work with R's parallel.
+
+## Parallel workflow
+
+(Usually) We do the following:
+
+1.  Create a `PSOCK/FORK` (or other) cluster using `makePSOCKCluster`/`makeForkCluster`
+    (or `makeCluster`)
+    
+2.  Copy/prepare each R session (if you are using a `PSOCK` cluster):
+
+    a.  Copy objects with `clusterExport`
+
+    b.  Pass expressions with `clusterEvalQ`
+
+    c.  Set a seed
+
+3.  Do your call: `parApply`, `parLapply`, etc. 
+
+4.  Stop the cluster with `clusterStop`
+
+
+## Types of clusters: PSOCK
+
+-   Can be created with `makePSOCKCluster`
+
+-   Creates brand new R Sessions (so nothing is inherited from the master), e.g.
+    
+    ```r
+    # This creates a cluster with 4 R sessions
+    cl <- makePSOCKCluster(4)
+    ```
+
+-   Child sessions are connected to the master session via Socket connections
+
+-   Can be created outside the current computer, **i.e.**, across multiple computers!
+
+## Types of clusters: Fork
+
+-   Fork Cluster `makeForkCluster`:
+
+-   Uses OS [Forking](https://en.wikipedia.org/wiki/Fork_(system_call)),
+
+-   Copies the current R session locally (so everything is inherited from
+    the master up to that point).
+    
+-   Data is only duplicated if altered (need to double check when this happens!)
+
+-   Not available on Windows.
+
+Other `makeCluster`: passed to [**snow**](https://cran.r-project.org/package=snow)
+(Simple Network of Workstations)
+
+
+## Ex 1: Parallel RNG with `makePSOCKCluster`
+
+::: {.callout-caution}
+Using more threads than cores available on your computer is never a good idea. As a rule of thumb, clusters should be created using `parallel::detectCores() - 1` cores (so you leave one free for the rest of your computer.)
+:::
+
+```{r parallel-ex-psock, echo=TRUE}
+# 1. CREATING A CLUSTER
+library(parallel)
+nnodes <- 4L
+cl     <- makePSOCKcluster(nnodes)    
+# 2. PREPARING THE CLUSTER
+clusterSetRNGStream(cl, 123) # Equivalent to `set.seed(123)`
+# 3. DO YOUR CALL
+ans <- parSapply(cl, 1:nnodes, function(x) runif(1e3))
+(ans0 <- var(ans))
+```
+
+Making sure it is reproducible
+
+```{r parallel-ex-psock-cont, echo=TRUE}
+# I want to get the same!
+clusterSetRNGStream(cl, 123)
+ans1 <- var(parSapply(cl, 1:nnodes, function(x) runif(1e3)))
+# 4. STOP THE CLUSTER
+stopCluster(cl)
+all.equal(ans0, ans1) # All equal!
+```
+
+## Ex 2: Parallel RNG with `makeForkCluster`
+
+In the case of `makeForkCluster`
+
+```{r parallel-ex-fork, echo=TRUE, eval = TRUE}
+# 1. CREATING A CLUSTER
+library(parallel)
+# The fork cluster will copy the -nsims- object
+nsims  <- 1e3
+nnodes <- 4L
+cl     <- makeForkCluster(nnodes)    
+# 2. PREPARING THE CLUSTER
+clusterSetRNGStream(cl, 123)
+# 3. DO YOUR CALL
+ans <- do.call(cbind, parLapply(cl, 1:nnodes, function(x) {
+  runif(nsims) # Look! we use the nsims object!
+               # This would have fail in makePSOCKCluster
+               # if we didn't copy -nsims- first.
+  }))
+(ans0 <- var(ans))
+```
+
+Again, we want to make sure this is reproducible
+
+```{r parallel-ex-fork-cont, echo=TRUE}
+# Same sequence with same seed
+clusterSetRNGStream(cl, 123)
+ans1 <- var(do.call(cbind, parLapply(cl, 1:nnodes, function(x) runif(nsims))))
+ans0 - ans1 # A matrix of zeros
+# 4. STOP THE CLUSTER
+stopCluster(cl)
+```
+
+<text style="color:white;">Well, if you are a Mac-OS/Linux user, there's a more straightforward way of doing this...</text>
+
+
+## Ex 3: Parallel RNG with `mclapply` (Forking on the fly)
+
+In the case of `mclapply`, the forking (cluster creation) is done on the fly!
+
+```{r parallel-ex-mclapply, echo=TRUE, eval = TRUE}
+# 1. CREATING A CLUSTER
+library(parallel)
+# The fork cluster will copy the -nsims- object
+nsims  <- 1e3
+nnodes <- 4L
+# cl     <- makeForkCluster(nnodes) # mclapply does it on the fly
+# 2. PREPARING THE CLUSTER
+set.seed(123) 
+# 3. DO YOUR CALL
+ans <- do.call(cbind, mclapply(1:nnodes, function(x) runif(nsims)))
+(ans0 <- var(ans))
+```
+
+Once more, we want to make sure this is reproducible
+
+```{r parallel-ex-mclapply-cont, echo=TRUE}
+# Same sequence with same seed
+set.seed(123) 
+ans1 <- var(do.call(cbind, mclapply(1:nnodes, function(x) runif(nsims))))
+ans0 - ans1 # A matrix of zeros
+# 4. STOP THE CLUSTER
+# stopCluster(cl) no need of doing this anymore
+```
+
+## Exercise: Overhead costs
+
+Compare the timing of taking the sum of 100 numbers when parallelized versus not.  For the unparallized (serialized) version, use the following:
+
+```{r}
+set.seed(123)
+x <- runif(n=100)
+
+serial_sum <- function(x){
+  x_sum <- sum(x)
+  return(x_sum)
+}
+```
+
+
+For the parallized version, follow this outline
+
+```{r}
+library(parallel)
+```
+
+```{r, eval=FALSE}
+
+set.seed(123)
+x <- runif(n=100)
+
+parallel_sum <- function(){
+  
+  
+  # Set number of cores to use
+  # make cluster and export to the cluster the x variable
+  # Use "split function to divide x up into as many chunks as the number of cores
+  
+  # Calculate partial sums doing something like:
+  
+  partial_sums <- parallel::parSapply(cl, x_split, sum)
+  
+  # Stop the cluster
+  
+  # Add and return the partial sums
+  
+}
+
+```
+
+
+```{r, echo=FALSE, eval=TRUE, results=FALSE}
+
+set.seed(123)
+x <- runif(n=100)
+
+parallel_sum <- function(x){
+  
+  
+  num_cores <- 4L
+  cl <- makeCluster(num_cores)
+  clusterExport(cl,"x")
+  
+  x_split <- suppressWarnings(split(x, 1:num_cores))
+  
+  partial_sums <- parallel::parSapply(cl, x_split, sum)
+  
+  stopCluster(cl)
+  
+  x_sum <- sum(partial_sums)
+  
+  return(x_sum)
+  
+}
+```
+
+Compare the timing of the two approaches:
+
+```{r}
+#| label: overhead
+#| eval: false
+microbenchmark::microbenchmark(
+  serial   = serial_sum(x),
+  parallel = parallel_sum(x),
+  times    = 10,
+  unit     = "relative"
+)
+```

@@ -1,0 +1,139 @@
+---
+title: Parallel computing with R
+author: George G. Vega Yon, Ph.D.
+date: 2025-08-14
+---
+
+::: {.callout-note}
+This content was originally published in the book "Applied HPC with R" by George G. Vega Yon, Ph.D. You can find the book at <https://book-hpc.ggvy.cl>
+:::
+
+While most people see R as a slow programming language, it has powerful features that dramatically accelerate your code [^exampledatatable]. Although R wasn't necessarily built for speed, there are some tools and ways in which we can accelerate R. This chapter introduces what we will understand as High-performance computing in R.
+
+[^exampledatatable]: Nonetheless, this claim can be said about almost any programming language; there are notable examples like the R package [`data.table`](https://cran.r-project.org){target="_blank"} [@datatable] which has been demonstrated to [out-perform most data wrangling tools](https://h2oai.github.io/db-benchmark/){target="_blank"}. 
+ 
+
+## High-Performance Computing: An overview
+
+From R's perspective, we can think of HPC in terms of two or three things:[^crantask] Big data, parallel computing, and compiled code.  
+
+[^crantask]: Make sure to check out [CRAN Task View on HPC](https://CRAN.R-project.org/view=HighPerformanceComputing){target="_blank"}.
+
+### Big Data
+
+When we talk about big data, we refer to cases where your computer struggles to handle a dataset. A typical example of the latter is when the number of observations (rows) in your data frame is [too many to fit a linear regression model](https://stackoverflow.com/q/10326853/2097171){target="_blank"}. Instead of buying a bigger computer, there are many good solutions to solve memory-related problems:
+    
+*   **Out-of-memory storage**. The idea is simple, instead of using your RAM to load the data, use other methods to load the data. Two notewirthy alternatives are the [bigmemory](https://CRAN.R-project.org/package=bigmemory){target="_blank"} and [implyr](https://cran.r-project.org/package=implyr) R packages. The `bigmemory` package provides methods for using "*file-backed*" matrices. On the other hand, `implyr` implements a wrapper to access Apache Impala, an [SQL query engine for a cluster running Apache Hadoop](https://en.wikipedia.org/w/index.php?title=Apache_Impala&oldid=1116544272){target="_blank"}. 
+    
+*   **Efficient algorithms for big data**: To avoid running out of memory with your regression analysis, the R packages [biglm](https://cran.r-project.org/package=biglm){target="_blank"} and [biglasso](https://cran.r-project.org/package=biglasso){target="_blank"} deliver highly-efficient alternatives to `glm` and `glmnet`, respectively. Now, if your data fits your RAM, but you still struggle with data wrangling, the [data.table](https://CRAN.R-project.org/package=data.table) package is the solution.
+
+*   **Store it more efficiently**: Finally, when it comes to linear algebra, the [Matrix](https://CRAN.R-project.org/package=Matrix){target="_blank"} R package shines with its formal classes and methods for managing Sparse Matrices, *i.e.*, big matrices whose entries are primarily zeros; for example, the `dgCMatrix` objects. Furthermore, `Matrix` comes shipped with R, which makes it even more appealing.
+
+### Parallel computing
+
+```{r, echo=FALSE, fig.cap="Flynn's Classical Taxonomy ([Blaise Barney, **Introduction to Parallel Computing**, Lawrence Livermore National Laboratory](https://computing.llnl.gov/tutorials/parallel_comp/))", fig.align='center'}
+knitr::include_graphics("fig/flynnsTaxonomy.png")
+```
+
+We will focus on the **S**ingle **I**nstruction stream **M**ultiple **D**ata stream.
+
+In general terms, a parallel computing program is one in which we use two or more *computational threads* simultaneously. Although computational thread usually means core, there are multiple levels at which a computer program can be parallelized. To understand this, we first need to see what composes a modern computer:
+
+![Source: Original figure from LUMI consortium documentation [@lumi2023]](fig/socket-core-threads.svg){style="text-align: center"}
+
+Streaming SIMD Extensions \[[SSE](https://en.wikipedia.org/w/index.php?title=Streaming_SIMD_Extensions&oldid=1149173008){target="_blank"}\] and Advanced Vector Extensions \[[AVX](https://en.wikipedia.org/w/index.php?title=Advanced_Vector_Extensions&oldid=1148504462){target="_blank"}\]
+
+#### Serial vs. Parallel
+
+
+
+::: {.columns layout-align="center"} 
+
+::: {.column width="45%"}
+![](fig/serialProblem.png){width="100%"}
+:::
+
+::: {.column width="45%"}
+![](fig/parallelProblem.png){width="100%"}
+:::
+
+Source: [Blaise Barney, **Introduction to Parallel Computing**, Lawrence Livermore National Laboratory](https://computing.llnl.gov/tutorials/parallel_comp/){target="_blank"}
+:::
+
+
+
+![source: [Blaise Barney, **Introduction to Parallel Computing**, Lawrence Livermore National Laboratory](https://computing.llnl.gov/tutorials/parallel_comp/)](fig/nodesNetwork.png){fig-align="center" width="60%"}
+
+
+
+### High-performance computing in R
+
+#### Some vocabulary for HPC
+
+In raw terms
+
+*   Supercomputer: A **single** big machine with thousands of cores/GPGPUs.
+
+*   High-Performance Computing (HPC): **Multiple** machines within
+    a **single** network.
+    
+*   High Throughput Computing (HTC): **Multiple** machines across **multiple**
+    networks.
+    
+You may not have access to a supercomputer, but certainly, HPC/HTC clusters are
+more accessible these days, *e.g.*, AWS provides a service to create HPC clusters
+at a low cost (allegedly, since nobody understands how pricing works)
+
+### GPU vs. CPU
+
+```{r gpu-cpu, echo=FALSE, fig.cap="[NVIDIA Blog](http://www.nvidia.com/object/what-is-gpu-computing.html)", fig.align='center'}
+knitr::include_graphics("fig/cpuvsgpu.jpg")
+nnodes <- 4L
+```
+
+*   Why use OpenMP if GPU is _suited to compute-intensive operations_? Well, mostly because
+    OpenMP is **VERY** easy to implement (easier than CUDA, which is the easiest way to use GPU).[^kokkos]
+
+[^kokkos]: [Sadia National Laboratories](https://www.sandia.gov/ccr/software/kokkos/){target="_blank"} started the [Kokkos project](https://kokkos.org/){target="_blank"}, which provides a one-fits-all C++ library for parallel programming. More information on the Kokkos's [wiki site](https://kokkos.github.io/kokkos-core-wiki/){target="_blank"}.
+
+
+### When is it a good idea?
+
+```{r good-idea, echo=FALSE, fig.cap="Ask yourself these questions before jumping into HPC!", fig.align='center', out.width="85%"}
+knitr::include_graphics("fig/when_to_parallel.svg")
+```
+
+### Parallel computing in R
+
+While there are several alternatives (just take a look at the
+[High-Performance Computing Task View](https://cran.r-project.org/web/views/HighPerformanceComputing.html)),
+we'll focus on the following R-packages for **explicit parallelism**:
+
+*   [**parallel**](https://cran.r-project.org/package=parallel): R package that provides '[s]upport for parallel computation,
+    including random-number generation'.
+
+*   [**future**](https://cran.r-project.org/package=future): '[A] lightweight and
+    unified Future API for sequential and parallel processing of R
+    expression via futures.'
+    
+*   [**Rcpp**](https://cran.r-project.org/package=Rcpp) + [OpenMP](https://www.openmp.org):
+    [Rcpp](https://cran.r-project.org/package=Rcpp) is an R package for integrating
+    R with C++ and OpenMP is a library for high-level parallelism for C/C++ and
+    FORTRAN.
+    
+Others but not used here
+
+*   [**foreach**](https://cran.r-project.org/package=foreach) for iterating through lists in parallel.
+
+*   [**Rmpi**](https://cran.r-project.org/package=Rmpi) for creating MPI clusters.
+
+And tools for implicit parallelism (out-of-the-box tools that allow the
+programmer not to worry about parallelization):
+
+*   [**gpuR**](https://cran.r-project.org/package=gpuR) for Matrix manipulation using
+GPU
+
+*   [**tensorflow**](https://cran.r-project.org/package=tensorflow) an R interface to
+[TensorFlow](https://www.tensorflow.org/).
+
+A ton of other types of resources, notably the tools for working with batch schedulers such as [Slurm](http://slurm.schedmd.com), and [HTCondor](https://research.cs.wisc.edu/htcondor/).
