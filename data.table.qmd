@@ -1,5 +1,7 @@
 ---
 title: The data.table R package
+author: George G. Vega Yon, Ph.D.
+date: 2025-08-14
 ---
 
 For most cases, the most proper data wrangling tool in R is the [`dplyr`](https://cran.r-project.org/package=dplyr) package. Nonetheless, when dealing with large amounts of data, the [`data.table`](https://cran.r-project.org/package=data.table) package is the fastest alternative available for doing data processing within R (see the [benchmarks](https://duckdblabs.github.io/db-benchmark/){target="_blank"}).
