@@ -54,6 +54,10 @@ The data visualization shows the distribution of time spent in each function. Us
 
 ![](fig/profvis_data.png)
 
+::: {.callout-tip}
+When developing R packages, it is a good idea to pair your `profvis::profvis` call with `devtools::load_all()` to ensure that all source code is available to the profiler. Otherwise, the flamegraph won't show your code (it will say "unavailable").
+:::
+
 ## Exercise: Identifying the bottle neck
 
 ```{r}

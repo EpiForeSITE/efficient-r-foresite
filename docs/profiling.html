@@ -250,6 +250,19 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p><img src="fig/profvis_flame_graph.png" class="img-fluid"></p>
 <p>The data visualization shows the distribution of time spent in each function. Using a tree structure, which allows taking deep dives into the call stack.</p>
 <p><img src="fig/profvis_data.png" class="img-fluid"></p>
+<div class="callout callout-style-default callout-tip callout-titled">
+<div class="callout-header d-flex align-content-center">
+<div class="callout-icon-container">
+<i class="callout-icon"></i>
+</div>
+<div class="callout-title-container flex-fill">
+Tip
+</div>
+</div>
+<div class="callout-body-container callout-body">
+<p>When developing R packages, it is a good idea to pair your <code>profvis::profvis</code> call with <code>devtools::load_all()</code> to ensure that all source code is available to the profiler. Otherwise, the flamegraph won’t show your code (it will say “unavailable”).</p>
+</div>
+</div>
 </section>
 <section id="exercise-identifying-the-bottle-neck" class="level2">
 <h2 class="anchored" data-anchor-id="exercise-identifying-the-bottle-neck">Exercise: Identifying the bottle neck</h2>
