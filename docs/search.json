@@ -42,39 +42,81 @@
     "text": "Footnotes\n\n\nNonetheless, this claim can be said about almost any programming language; there are notable examples like the R package data.table [@datatable] which has been demonstrated to out-perform most data wrangling tools.↩︎\nMake sure to check out CRAN Task View on HPC.↩︎\nSadia National Laboratories started the Kokkos project, which provides a one-fits-all C++ library for parallel programming. More information on the Kokkos’s wiki site.↩︎"
   },
   {
-    "objectID": "index.html",
-    "href": "index.html",
-    "title": "Welcome!",
+    "objectID": "efficiency.html",
+    "href": "efficiency.html",
+    "title": "Writing efficient code",
     "section": "",
-    "text": "Attendees during the morning session led by Andrew Redd (Photo by George G Vega Yon)\nForeSITE"
+    "text": "R code can be very efficient for typical tasks, but, as the code starts to increase in complexity, it is easy for it to become inefficient.\nSome quick R tips for efficient computing code:\n\nUse vectorized operations instead of loops.\nTry to use caching to avoid repeated calculations. Caching can also be done out of memory!\nAvoid unnecessary steps/data processing.\nReduce the number of copy operations.\nForeSITE"
   },
   {
-    "objectID": "index.html#about-the-workshop",
-    "href": "index.html#about-the-workshop",
-    "title": "Welcome!",
-    "section": "About the workshop",
-    "text": "About the workshop\nEfficient programming is crucial for working with large datasets and complex analyses in R. This half-day workshop is designed to teach practical techniques for improving R code performance through vectorization, parallel computing, and specialized packages like data.table. Participants will learn how to identify bottlenecks in their code and apply appropriate optimization strategies to dramatically improve performance.\n\nTime and location\nThe workshop will take place on Friday August 15th, 2025 at 9am-1pm MT. More details will be provided to registered attendees.\n\n\nWhat are good use cases for efficient R programming?\n\nYou work with large datasets that take a long time to process\nYour R scripts run slowly and you need to optimize performance\nYou want to learn about vectorization techniques to replace slow loops\nYou’re interested in parallel computing to utilize multiple CPU cores\nYou want to master data.table for fast data manipulation\nYou need to process data that doesn’t fit in memory efficiently\nYou want to benchmark and profile your R code to identify bottlenecks\n\n\n\nWho should attend?\nR programming users with intermediate experience who want to improve their code’s performance.\n\n\nWhat level of programming should attendees have?\nAttendees should have solid experience using the R programming language, including writing functions, working with data frames, and basic data manipulation using tools like dplyr, base R, or data.table. Some familiarity with loops and apply functions would be helpful.\n\n\nWhat tools will be used during the workshop?\nBesides the R programming language, we will be using RStudio. Participants should have R and RStudio installed on their laptops. We will also cover specialized packages including:\n\ndata.table for fast data manipulation\nparallel for parallel computing\nmicrobenchmark and profvis for performance measurement"
+    "objectID": "efficiency.html#vectorized-operations",
+    "href": "efficiency.html#vectorized-operations",
+    "title": "Writing efficient code",
+    "section": "Vectorized Operations",
+    "text": "Vectorized Operations\nVectorization can mean many things in programming, but in R, vectorization refers to using functions over vectors. For instance, instead of using a loop to add two vectors together, you can use the + operator directly on the vectors:\n\n# Using a loop\nset.seed(331)\na &lt;- runif(1e3)\nb &lt;- runif(1e3)\nresult &lt;- numeric(length(a))\nfor (i in seq_along(a)) {\n  result[i] &lt;- a[i] + b[i]\n}\n\n# Using vectorized operation\nresult &lt;- a + b\n\nWe can even bechmark the performance of these two approaches:\n\nlibrary(microbenchmark)\nmicrobenchmark(\n  loop = {\n    result &lt;- numeric(length(a))\n    for (i in seq_along(a)) {\n      result[i] &lt;- a[i] + b[i]\n    }\n  },\n  vectorized = {\n    result &lt;- a + b\n  },\n  unit = \"relative\"\n)\n\nUnit: relative\n       expr  min       lq     mean   median       uq      max neval\n       loop 4374 1724.909 1231.412 1494.423 1094.216 518.7375   100\n vectorized    1    1.000    1.000    1.000    1.000   1.0000   100\n\n\n\n\n\n\n\n\nTip\n\n\n\nFor-loops are not always bad. The main issue is with the code inside of the for-loop. If the code is already vectorized, then there’s no need to remove the for-loop (unless you can vectorize the for-loop itself)."
   },
   {
-    "objectID": "index.html#registration",
-    "href": "index.html#registration",
-    "title": "Welcome!",
-    "section": "Registration",
-    "text": "Registration\nFor registration, please reach out to your ForeSITE contact. You can also email us at george.vegayon@utah.edu."
+    "objectID": "efficiency.html#caching-calculations",
+    "href": "efficiency.html#caching-calculations",
+    "title": "Writing efficient code",
+    "section": "Caching calculations",
+    "text": "Caching calculations\nMany times, it is useful to cache calculations that are expensive to compute. For instance, if you have a function that takes a long time to run, you can store the result in a variable and reuse it later instead of recalculating it.\nHere is a bad example using the Fibonacci sequence:\n\nfibonacci &lt;- function(n) {\n  if (n &lt;= 1) {\n    return(n)\n  }\n  return(fibonacci(n - 1) + fibonacci(n - 2))\n}\n\nfibonacci_cached &lt;- function(n) {\n  prev &lt;- numeric(n + 1)\n  for (i in seq_len(n)) {\n    if (i &lt;= 1) {\n      prev[i + 1] &lt;- i\n    } else {\n      prev[i + 1] &lt;- prev[i] + prev[i - 1]\n    }\n  }\n\n  return(prev[n + 1])\n}\n\nBoth of these functions should return the same result, but the second is significantly faster as it avoids calling the function recursively:\n\nmicrobenchmark(\n  fibonacci(10),\n  fibonacci_cached(10),\n  times = 10,\n  unit = \"relative\",\n  check = \"equal\"\n)\n\nUnit: relative\n                 expr   min       lq     mean   median uq      max neval\n        fibonacci(10) 26.35 25.47619 19.34752 24.15556 23 7.227848    10\n fibonacci_cached(10)  1.00  1.00000  1.00000  1.00000  1 1.000000    10"
   },
   {
-    "objectID": "index.html#funding",
-    "href": "index.html#funding",
-    "title": "Welcome!",
-    "section": "Funding",
-    "text": "Funding\nThis workshop is organized by ForeSITE using funds from the CDC’s Center for Forecasting and Outbreak Analytics (CFA) (Award number 1U01CK000585; 75D30121F00003)."
+    "objectID": "efficiency.html#caching-calculations-bis",
+    "href": "efficiency.html#caching-calculations-bis",
+    "title": "Writing efficient code",
+    "section": "Caching calculations (bis)",
+    "text": "Caching calculations (bis)\nIn the case of large calculations, we can also save results to the disk. For example, if we are running a simulation/computation, one per city/scenario, we can save the results to a file and read them later. Here is how to do it:\nFor each value of i, do the following:\n\nCheck if the file result_i.rds exists.\nIf it does not exist, run the computation and save the result to result_i.rds.\nIf it does exist, read the result from result_i.rds.\n\nAs simple as that! Here is an example using R code:\n\n# A complicated simulation function\nsimulate &lt;- function(i, seed) {\n  set.seed(seed)\n  rnorm(1e5)\n}\n\n# Generating seeds for each iteration\nset.seed(331)\nnsims &lt;- 100\nseeds &lt;- sample.int(.Machine$integer.max, nsims)\n\n# Just for this example, we will use a tempfile\nres_0 &lt;- vector(\"list\", length = nsims)\nfor (i in seq_len(nsims)) {\n  \n  # Creating the filename\n  fn &lt;- file.path(tempdir(), paste0(i, \".rds\"))\n\n  # Does the result already exist?\n  if (file.exists(fn))\n    res_0[[i]] &lt;- readRDS(fn)\n  else {\n    # If not, run the simulation and save the result\n    res_0[[i]] &lt;- simulate(i, seed = i)\n    saveRDS(res_0[[i]], fn)\n  }\n\n}\n\n\n\n\n\n\n\nTip\n\n\n\nWhen running simulations, it is a good pracitice to set individual seeds for each simulation (if these are individually complex). That way, if the code fails, you can rerun only the failed simulations without having to redo all of them.\n\n\nFurthermore, it is a good idea to wrap your code in a tryCatch() call to handle errors gracefully. This way, if a simulation fails, you can log the error and continue with the next simulation without stopping the entire process.\n\n# Just for this example, we will use a tempfile\nres_0 &lt;- vector(\"list\", length = nsims)\nfor (i in seq_len(nsims)) {\n  \n  # Creating the filename\n  fn &lt;- file.path(tempdir(), paste0(i, \".rds\"))\n\n  # Does the result already exist?\n  res &lt;- tryCatch({\n    if (file.exists(fn))\n      readRDS(fn)\n    else {\n      # If not, run the simulation and save the result\n      ans_i &lt;- simulate(i, seed = i)\n      saveRDS(ans_i, fn)\n      ans_i\n    }\n  }, error = function(e) e)\n\n  if (inherits(res, \"error\")) {\n    message(\"Simulation \", i, \" failed: \", res$message)\n    next  # Skip to the next iteration\n  }\n\n  # We still store it, even if it failed\n  res_0[[i]] &lt;- res\n\n}"
   },
   {
-    "objectID": "index.html#ai-disclaimer",
-    "href": "index.html#ai-disclaimer",
-    "title": "Welcome!",
-    "section": "AI Disclaimer",
-    "text": "AI Disclaimer\nThis project contains AI-generated content. Particularly, via assistance (code completion and suggestions) using GitHub Copilot."
+    "objectID": "efficiency.html#avoiding-unnecessary-steps",
+    "href": "efficiency.html#avoiding-unnecessary-steps",
+    "title": "Writing efficient code",
+    "section": "Avoiding unnecessary steps",
+    "text": "Avoiding unnecessary steps\nMany times, we can find shortcuts to reduce the amount of data processing we need to do. A great example is in the linear regression function lm(). The lm() function will go beyond finding the coefficients in a linear model, it will also compute residuals, fitted values, and more. Instead, we can use the function lm.fit() which only computes the coefficients:\n\nset.seed(331)\nx &lt;- rnorm(2e3)\ny &lt;- 2 + 3 * x + rnorm(2e3)\n\n# Comparing\nmicrobenchmark(\n  lm = coef(lm(y ~ x)),\n  lm_fit = coef(lm.fit(cbind(1, x), y)),\n  times = 10,\n  unit = \"relative\"\n)\n\nUnit: relative\n   expr      min       lq     mean   median       uq      max neval\n     lm 3.848261 3.706667 4.988114 3.578396 3.767868 12.80968    10\n lm_fit 1.000000 1.000000 1.000000 1.000000 1.000000  1.00000    10"
+  },
+  {
+    "objectID": "efficiency.html#reducing-copy-operations",
+    "href": "efficiency.html#reducing-copy-operations",
+    "title": "Writing efficient code",
+    "section": "Reducing copy operations",
+    "text": "Reducing copy operations\nLike in any programming language, copy operations in R can be expensive. Beyond increasing the amount of memory used, copy operations require tme to allocate memory and then copy the data. Modern R minimizes these by using copy-on-modify. This means that R will not copy an object until it is modified. For example, the following code makes multiple copies of X, but it is until the last line that R actually makes a copy of X:\n\nset.seed(331)\nX &lt;- runif(1e4)\nY &lt;- X\nZ &lt;- X\n\n# Checking the address of the objects\nlibrary(lobstr)\nobj_addr(X)\n## [1] \"0x1318b8000\"\nobj_addr(Y)\n## [1] \"0x1318b8000\"\nobj_addr(Z)\n## [1] \"0x1318b8000\"\n\nModifying X will trigger a copy operation, and the addresses of Y and Z will remain the same, while X will have a new address:\n\n# Modifying X\nX[1] &lt;- 100  # This is when R makes a copy of X\nobj_addr(X)\n## [1] \"0x121d20000\"\nobj_addr(Y)\n## [1] \"0x1318b8000\"\nobj_addr(Z)\n## [1] \"0x1318b8000\""
+  },
+  {
+    "objectID": "profiling.html",
+    "href": "profiling.html",
+    "title": "Profiling",
+    "section": "",
+    "text": "Code profiling is a fundamental tool for programmers. With profiling, it is possible to identify potential bottle necks in your code, as well as exessive memory usage. Some important things to consider when profiling your code:\nHere is a proposed workflow for profiling and optimizing your code in general\nForeSITE"
+  },
+  {
+    "objectID": "profiling.html#a-proposed-workflow",
+    "href": "profiling.html#a-proposed-workflow",
+    "title": "Profiling",
+    "section": "A proposed workflow",
+    "text": "A proposed workflow\nHere is a formula to follow when doing code profiling/optimization:\n\nAsk yourself these questions before you jump into profiling:\n\n\n\n\n\n\nflowchart LR\n  A((Start))--&gt;B{Is it&lt;br&gt;slow?}\n  B--&gt;|Yes|C{Are you&lt;br&gt;sure?}\n  B--&gt;|Not really, it&lt;br&gt;just sounds cool...|D((End))\n  C--&gt;|Maybe...|E{Takes more&lt;br&gt;than 1min?}\n\n  C--&gt;|Yes|F{Is it&lt;br&gt;worth it?}\n  E--&gt;|Yes|F\n  E--&gt;|No|D\n\n  F--&gt;|No, I'm&lt;br&gt;just bored&lt;br&gt;|D\n  F--&gt;|Yes, my life&lt;br&gt;depends on it|G((Proceed with&lt;br&gt;optimization))\n\n\n\n\n\n\n\nIf you succeed, then ensure that the profiling is done in a finite time, this is, use a subset of the data to avoid having long waits. Running the profiler will add overhead computing time, so try to keep it short (e.g., 1 minute).\nThere may be many things that could be optimized, focus on what would deliver the highest impact. Could be a function that is only called once but takes a long time to execute, or a function that is called multiple times but is relatively fast.\nBefore making any changes, ensure that you have a backup of your original code, as well as a copy of the current profiling results.\nRe-run the profiler and compare performance. If no changes are observed, then go back to step 2."
+  },
+  {
+    "objectID": "profiling.html#profiling-code-in-r",
+    "href": "profiling.html#profiling-code-in-r",
+    "title": "Profiling",
+    "section": "Profiling code in R",
+    "text": "Profiling code in R\nIn the R programming language, the most used profiling tool comes with the profvis package. The package provides a wrapper of the Rprof function, which is a built-in R function for profiling code. The profvis package makes it easier to visualize the profiling results in a web-based interface.\nTo use profvis, you first need to install it from CRAN:\ninstall.packages(\"profvis\")\nThen, you can use it to profile your R code like this:\nlibrary(profvis)\n\nprofvis({\n  # Your R code here\n})\nThis will execute the code and generate a visualization of the profiling results in a new browser window. You can also save the output using the htmlwidgets package:\npv &lt;- profvis({\n  # Your R code here\n})\n\nhtmlwidgets::saveWidget(pv, \"profvis.html\")\nOnce open, you will see two visualizations: the flamegraph and the data. The flamegraph is one of the most useful visualizations. It directly maps the time and memory used by each line of code\n\nThe data visualization shows the distribution of time spent in each function. Using a tree structure, which allows taking deep dives into the call stack.\n\n\n\n\n\n\n\nTip\n\n\n\nWhen developing R packages, it is a good idea to pair your profvis::profvis call with devtools::load_all() to ensure that all source code is available to the profiler. Otherwise, the flamegraph won’t show your code (it will say “unavailable”)."
+  },
+  {
+    "objectID": "profiling.html#exercise-identifying-the-bottle-neckbottleneck",
+    "href": "profiling.html#exercise-identifying-the-bottle-neckbottleneck",
+    "title": "Profiling",
+    "section": "Exercise: Identifying the bottle neck1",
+    "text": "Exercise: Identifying the bottle neck1\n\n# Generate data\ntimes &lt;- 4e5\ncols &lt;- 150\ndata &lt;- as.data.frame(x = matrix(rnorm(times * cols, mean = 5), ncol = cols))\ndata &lt;- cbind(id = paste0(\"g\", seq_len(times)), data)\n\npv &lt;- profvis::profvis({\n  data1 &lt;- data   # Store in another variable for this run\n\n  # Get column means\n  means &lt;- apply(data1[, names(data1) != \"id\"], 2, mean)\n\n  # Subtract mean from each column\n  for (i in seq_along(means)) {\n    data1[, names(data1) != \"id\"][, i] &lt;- data1[, names(data1) != \"id\"][, i] - means[i]\n  }\n})\n\nhtmlwidgets::saveWidget(pv, \"profvis-slow-code.html\")\n\n# In interactive mode, we can directly view the profiling results\nif (interactive())\n  print(pv)\n\n\n\nCan you identify where is the bottleneck in the code? What would you do to speed it up?"
+  },
+  {
+    "objectID": "profiling.html#footnotes",
+    "href": "profiling.html#footnotes",
+    "title": "Profiling",
+    "section": "Footnotes",
+    "text": "Footnotes\n\n\nCode copied verbatim from the profvis R package here.↩︎"
   },
   {
     "objectID": "parallel_pkg.html",
@@ -133,46 +175,39 @@
     "text": "Exercise: Overhead costs\nCompare the timing of taking the sum of 100 numbers when parallelized versus not. For the unparallized (serialized) version, use the following:\n\nset.seed(123)\nx &lt;- runif(n=100)\n\nserial_sum &lt;- function(x){\n  x_sum &lt;- sum(x)\n  return(x_sum)\n}\n\nFor the parallized version, follow this outline\n\nlibrary(parallel)\n\n\nset.seed(123)\nx &lt;- runif(n=100)\n\nparallel_sum &lt;- function(){\n  \n  \n  # Set number of cores to use\n  # make cluster and export to the cluster the x variable\n  # Use \"split function to divide x up into as many chunks as the number of cores\n  \n  # Calculate partial sums doing something like:\n  \n  partial_sums &lt;- parallel::parSapply(cl, x_split, sum)\n  \n  # Stop the cluster\n  \n  # Add and return the partial sums\n  \n}\n\nCompare the timing of the two approaches:\n\nmicrobenchmark::microbenchmark(\n  serial   = serial_sum(x),\n  parallel = parallel_sum(x),\n  times    = 10,\n  unit     = \"relative\"\n)"
   },
   {
-    "objectID": "intro.html",
-    "href": "intro.html",
-    "title": "Introduction",
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "Welcome!",
     "section": "",
-    "text": "R code can be very efficient for typical tasks, but, as the code starts to increase in complexity, it is easy for it to become inefficient.\nSome quick R tips for efficient computing code:\n\nUse vectorized operations instead of loops.\nTry to use caching to avoid repeated calculations. Caching can also be done out of memory!\nAvoid unnecessary steps/data processing.\nReduce the number of copy operations.\nForeSITE"
+    "text": "Attendees during the morning session led by Andrew Redd (Photo by George G Vega Yon)\nForeSITE"
   },
   {
-    "objectID": "intro.html#vectorized-operations",
-    "href": "intro.html#vectorized-operations",
-    "title": "Introduction",
-    "section": "Vectorized Operations",
-    "text": "Vectorized Operations\nVectorization can mean many things in programming, but in R, vectorization refers to using functions over vectors. For instance, instead of using a loop to add two vectors together, you can use the + operator directly on the vectors:\n\n# Using a loop\nset.seed(331)\na &lt;- runif(1e3)\nb &lt;- runif(1e3)\nresult &lt;- numeric(length(a))\nfor (i in seq_along(a)) {\n  result[i] &lt;- a[i] + b[i]\n}\n\n# Using vectorized operation\nresult &lt;- a + b\n\nWe can even bechmark the performance of these two approaches:\n\nlibrary(microbenchmark)\nmicrobenchmark(\n  loop = {\n    result &lt;- numeric(length(a))\n    for (i in seq_along(a)) {\n      result[i] &lt;- a[i] + b[i]\n    }\n  },\n  vectorized = {\n    result &lt;- a + b\n  },\n  unit = \"relative\"\n)\n\nUnit: relative\n       expr    min       lq     mean  median       uq      max neval\n       loop 3608.2 1643.962 760.1619 948.375 636.9737 298.3105   100\n vectorized    1.0    1.000   1.0000   1.000   1.0000   1.0000   100\n\n\n\n\n\n\n\n\nTip\n\n\n\nFor-loops are not always bad. The main issue is with the code inside of the for-loop. If the code is already vectorized, then there’s no need to remove the for-loop (unless you can vectorize the for-loop itself)."
+    "objectID": "index.html#about-the-workshop",
+    "href": "index.html#about-the-workshop",
+    "title": "Welcome!",
+    "section": "About the workshop",
+    "text": "About the workshop\nEfficient programming is crucial for working with large datasets and complex analyses in R. This half-day workshop is designed to teach practical techniques for improving R code performance through vectorization, parallel computing, and specialized packages like data.table. Participants will learn how to identify bottlenecks in their code and apply appropriate optimization strategies to dramatically improve performance.\n\nTime and location\nThe workshop will take place on Friday August 15th, 2025 at 9am-1pm MT. More details will be provided to registered attendees.\n\n\nWhat are good use cases for efficient R programming?\n\nYou work with large datasets that take a long time to process\nYour R scripts run slowly and you need to optimize performance\nYou want to learn about vectorization techniques to replace slow loops\nYou’re interested in parallel computing to utilize multiple CPU cores\nYou want to master data.table for fast data manipulation\nYou need to process data that doesn’t fit in memory efficiently\nYou want to benchmark and profile your R code to identify bottlenecks\n\n\n\nWho should attend?\nR programming users with intermediate experience who want to improve their code’s performance.\n\n\nWhat level of programming should attendees have?\nAttendees should have solid experience using the R programming language, including writing functions, working with data frames, and basic data manipulation using tools like dplyr, base R, or data.table. Some familiarity with loops and apply functions would be helpful.\n\n\nWhat tools will be used during the workshop?\nBesides the R programming language, we will be using RStudio. Participants should have R and RStudio installed on their laptops. We will also cover specialized packages including:\n\ndata.table for fast data manipulation\nparallel for parallel computing\nmicrobenchmark and profvis for performance measurement"
   },
   {
-    "objectID": "intro.html#caching-calculations",
-    "href": "intro.html#caching-calculations",
-    "title": "Introduction",
-    "section": "Caching calculations",
-    "text": "Caching calculations\nMany times, it is useful to cache calculations that are expensive to compute. For instance, if you have a function that takes a long time to run, you can store the result in a variable and reuse it later instead of recalculating it.\nHere is a bad example using the Fibonacci sequence:\n\nfibonacci &lt;- function(n) {\n  if (n &lt;= 1) {\n    return(n)\n  }\n  return(fibonacci(n - 1) + fibonacci(n - 2))\n}\n\nfibonacci_cached &lt;- function(n) {\n  prev &lt;- numeric(n + 1)\n  for (i in seq_len(n)) {\n    if (i &lt;= 1) {\n      prev[i + 1] &lt;- i\n    } else {\n      prev[i + 1] &lt;- prev[i] + prev[i - 1]\n    }\n  }\n\n  return(prev[n + 1])\n}\n\nBoth of these functions should return the same result, but the second is significantly faster as it avoids calling the function recursively:\n\nmicrobenchmark(\n  fibonacci(10),\n  fibonacci_cached(10),\n  times = 10,\n  unit = \"relative\",\n  check = \"equal\"\n)\n\nUnit: relative\n                 expr min       lq    mean   median       uq      max neval\n        fibonacci(10)  24 19.53846 13.2241 18.01724 16.13889 4.459459    10\n fibonacci_cached(10)   1  1.00000  1.0000  1.00000  1.00000 1.000000    10"
+    "objectID": "index.html#registration",
+    "href": "index.html#registration",
+    "title": "Welcome!",
+    "section": "Registration",
+    "text": "Registration\nFor registration, please reach out to your ForeSITE contact. You can also email us at george.vegayon@utah.edu."
   },
   {
-    "objectID": "intro.html#caching-calculations-bis",
-    "href": "intro.html#caching-calculations-bis",
-    "title": "Introduction",
-    "section": "Caching calculations (bis)",
-    "text": "Caching calculations (bis)\nIn the case of large calculations, we can also save results to the disk. For example, if we are running a simulation/computation, one per city/scenario, we can save the results to a file and read them later. Here is how to do it:\nFor each value of i, do the following:\n\nCheck if the file result_i.rds exists.\nIf it does not exist, run the computation and save the result to result_i.rds.\nIf it does exist, read the result from result_i.rds.\n\nAs simple as that! Here is an example using R code:\n\n# A complicated simulation function\nsimulate &lt;- function(i, seed) {\n  set.seed(seed)\n  rnorm(1e5)\n}\n\n# Generating seeds for each iteration\nset.seed(331)\nnsims &lt;- 100\nseeds &lt;- sample.int(.Machine$integer.max, nsims)\n\n# Just for this example, we will use a tempfile\nres_0 &lt;- vector(\"list\", length = nsims)\nfor (i in seq_len(nsims)) {\n  \n  # Creating the filename\n  fn &lt;- file.path(tempdir(), paste0(i, \".rds\"))\n\n  # Does the result already exist?\n  if (file.exists(fn))\n    res_0[[i]] &lt;- readRDS(fn)\n  else {\n    # If not, run the simulation and save the result\n    res_0[[i]] &lt;- simulate(i, seed = i)\n    saveRDS(res_0[[i]], fn)\n  }\n\n}\n\n\n\n\n\n\n\nTip\n\n\n\nWhen running simulations, it is a good pracitice to set individual seeds for each simulation (if these are individually complex). That way, if the code fails, you can rerun only the failed simulations without having to redo all of them.\n\n\nFurthermore, it is a good idea to wrap your code in a tryCatch() call to handle errors gracefully. This way, if a simulation fails, you can log the error and continue with the next simulation without stopping the entire process.\n\n# Just for this example, we will use a tempfile\nres_0 &lt;- vector(\"list\", length = nsims)\nfor (i in seq_len(nsims)) {\n  \n  # Creating the filename\n  fn &lt;- file.path(tempdir(), paste0(i, \".rds\"))\n\n  # Does the result already exist?\n  res &lt;- tryCatch({\n    if (file.exists(fn))\n      readRDS(fn)\n    else {\n      # If not, run the simulation and save the result\n      ans_i &lt;- simulate(i, seed = i)\n      saveRDS(ans_i, fn)\n      ans_i\n    }\n  }, error = function(e) e)\n\n  if (inherits(res, \"error\")) {\n    message(\"Simulation \", i, \" failed: \", res$message)\n    next  # Skip to the next iteration\n  }\n\n  # We still store it, even if it failed\n  res_0[[i]] &lt;- res\n\n}"
+    "objectID": "index.html#funding",
+    "href": "index.html#funding",
+    "title": "Welcome!",
+    "section": "Funding",
+    "text": "Funding\nThis workshop is organized by ForeSITE using funds from the CDC’s Center for Forecasting and Outbreak Analytics (CFA) (Award number 1U01CK000585; 75D30121F00003)."
   },
   {
-    "objectID": "intro.html#avoiding-unnecessary-steps",
-    "href": "intro.html#avoiding-unnecessary-steps",
-    "title": "Introduction",
-    "section": "Avoiding unnecessary steps",
-    "text": "Avoiding unnecessary steps\nMany times, we can find shortcuts to reduce the amount of data processing we need to do. A great example is in the linear regression function lm(). The lm() function will go beyond finding the coefficients in a linear model, it will also compute residuals, fitted values, and more. Instead, we can use the function lm.fit() which only computes the coefficients:\n\nset.seed(331)\nx &lt;- rnorm(2e3)\ny &lt;- 2 + 3 * x + rnorm(2e3)\n\n# Comparing\nmicrobenchmark(\n  lm = coef(lm(y ~ x)),\n  lm_fit = coef(lm.fit(cbind(1, x), y)),\n  times = 10,\n  unit = \"relative\"\n)\n\nUnit: relative\n   expr     min       lq     mean  median       uq      max neval\n     lm 3.92569 3.995119 6.458811 3.92213 3.833866 23.58231    10\n lm_fit 1.00000 1.000000 1.000000 1.00000 1.000000  1.00000    10"
-  },
-  {
-    "objectID": "intro.html#reducing-copy-operations",
-    "href": "intro.html#reducing-copy-operations",
-    "title": "Introduction",
-    "section": "Reducing copy operations",
-    "text": "Reducing copy operations\nLike in any programming language, copy operations in R can be expensive. Beyond increasing the amount of memory used, copy operations require tme to allocate memory and then copy the data. Modern R minimizes these by using copy-on-modify. This means that R will not copy an object until it is modified. For example, the following code makes multiple copies of X, but it is until the last line that R actually makes a copy of X:\n\nset.seed(331)\nX &lt;- runif(1e4)\nY &lt;- X\nZ &lt;- X\n\n# Checking the address of the objects\nlibrary(lobstr)\nobj_addr(X)\n## [1] \"0x141970000\"\nobj_addr(Y)\n## [1] \"0x141970000\"\nobj_addr(Z)\n## [1] \"0x141970000\"\n\nModifying X will trigger a copy operation, and the addresses of Y and Z will remain the same, while X will have a new address:\n\n# Modifying X\nX[1] &lt;- 100  # This is when R makes a copy of X\nobj_addr(X)\n## [1] \"0x1305f8000\"\nobj_addr(Y)\n## [1] \"0x141970000\"\nobj_addr(Z)\n## [1] \"0x141970000\""
+    "objectID": "index.html#ai-disclaimer",
+    "href": "index.html#ai-disclaimer",
+    "title": "Welcome!",
+    "section": "AI Disclaimer",
+    "text": "AI Disclaimer\nThis project contains AI-generated content. Particularly, via assistance (code completion and suggestions) using GitHub Copilot."
   },
   {
     "objectID": "program.html",
@@ -180,6 +215,13 @@
     "title": "Program",
     "section": "",
     "text": "This half-day workshop will focus on practical techniques for writing efficient R code. Participants will learn about vectorization, parallel computing, and specialized packages to dramatically improve their R code performance. The session will include hands-on exercises and real-world examples.\nForeSITE"
+  },
+  {
+    "objectID": "program.html#plan",
+    "href": "program.html#plan",
+    "title": "Program",
+    "section": "Plan",
+    "text": "Plan\nThe first hour and a half of the workshop will cover the following topics:\n\nProfiling (Profiling)\nWriting efficient code (Efficiency)\nThe data.table package (Data.Table)\nParallel computing in R (Parallel computing in R and the parallel package)\n\nThe last hour will be dedicated to looking into the participants’ specific use cases and challenges, providing tailored advice and solutions. Much of the content will be driven by the participants’ needs and questions, and due to the time constraints, we will most likely skip some sections of the lectures."
   },
   {
     "objectID": "program.html#resources-and-git-materials",
@@ -194,96 +236,5 @@
     "title": "Participants",
     "section": "",
     "text": "Some of the participants of the workshop are listed below:\n\n\nGeorge G Vega Yon (pronouns: He/Him/Él) University of Utah   \n\nI am an Assistant Professor of Research at the Division of Epidemiology at the University of Utah. I work on studying Complex Systems using Statistical Computing. I have over ten years of experience developing scientific software focusing on high-performance computing, data visualization, and social network analysis. My training is in Public Policy (M.A. UAI, 2011), Economics (M.Sc. Caltech, 2015), and Biostatistics (Ph.D. USC, 2020).\n\n\n\n\nForeSITE"
-  },
-  {
-    "objectID": "profiling.html",
-    "href": "profiling.html",
-    "title": "Profiling",
-    "section": "",
-    "text": "Code profiling is a fundamental tool for programmers. With profiling, it is possible to identify potential bottle necks in your code, as well as exessive memory usage. Some important things to consider when profiling your code:\nHere is a proposed workflow for profiling and optimizing your code in general\nForeSITE"
-  },
-  {
-    "objectID": "profiling.html#profiling-code-in-r",
-    "href": "profiling.html#profiling-code-in-r",
-    "title": "Profiling",
-    "section": "Profiling code in R",
-    "text": "Profiling code in R\nIn the R programming language, the most used profiling tool comes with the profvis package. The package provides a wrapper of the Rprof function, which is a built-in R function for profiling code. The profvis package makes it easier to visualize the profiling results in a web-based interface.\nTo use profvis, you first need to install it from CRAN:\ninstall.packages(\"profvis\")\nThen, you can use it to profile your R code like this:\nlibrary(profvis)\n\nprofvis({\n  # Your R code here\n})\nThis will execute the code and generate a visualization of the profiling results in a new browser window. You can also save the output using the htmlwidgets package:\npv &lt;- profvis({\n  # Your R code here\n})\n\nhtmlwidgets::saveWidget(pv, \"profvis.html\")\nOnce open, you will see two visualizations: the flamegraph and the data. The flamegraph is one of the most useful visualizations. It directly maps the time and memory used by each line of code\n\nThe data visualization shows the distribution of time spent in each function. Using a tree structure, which allows taking deep dives into the call stack.\n\n\n\n\n\n\n\nTip\n\n\n\nWhen developing R packages, it is a good idea to pair your profvis::profvis call with devtools::load_all() to ensure that all source code is available to the profiler. Otherwise, the flamegraph won’t show your code (it will say “unavailable”)."
-  },
-  {
-    "objectID": "profiling.html#exercise-identifying-the-bottle-neck",
-    "href": "profiling.html#exercise-identifying-the-bottle-neck",
-    "title": "Profiling",
-    "section": "Exercise: Identifying the bottle neck",
-    "text": "Exercise: Identifying the bottle neck\n\n# Generate data\ntimes &lt;- 4e5\ncols &lt;- 150\ndata &lt;- as.data.frame(x = matrix(rnorm(times * cols, mean = 5), ncol = cols))\ndata &lt;- cbind(id = paste0(\"g\", seq_len(times)), data)\n\npv &lt;- profvis::profvis({\n  data1 &lt;- data   # Store in another variable for this run\n\n  # Get column means\n  means &lt;- apply(data1[, names(data1) != \"id\"], 2, mean)\n\n  # Subtract mean from each column\n  for (i in seq_along(means)) {\n    data1[, names(data1) != \"id\"][, i] &lt;- data1[, names(data1) != \"id\"][, i] - means[i]\n  }\n})\n\nhtmlwidgets::saveWidget(pv, \"profvis-slow-code.html\")\n\n# In interactive mode, we can directly view the profiling results\nif (interactive())\n  print(pv)\n\n\n\nCan you identify where is the bottleneck in the code? What would you do to speed it up?"
-  },
-  {
-    "objectID": "profiling.html#exercise-identifying-the-bottle-neckbottleneck",
-    "href": "profiling.html#exercise-identifying-the-bottle-neckbottleneck",
-    "title": "Profiling",
-    "section": "Exercise: Identifying the bottle neck1",
-    "text": "Exercise: Identifying the bottle neck1\n\n# Generate data\ntimes &lt;- 4e5\ncols &lt;- 150\ndata &lt;- as.data.frame(x = matrix(rnorm(times * cols, mean = 5), ncol = cols))\ndata &lt;- cbind(id = paste0(\"g\", seq_len(times)), data)\n\npv &lt;- profvis::profvis({\n  data1 &lt;- data   # Store in another variable for this run\n\n  # Get column means\n  means &lt;- apply(data1[, names(data1) != \"id\"], 2, mean)\n\n  # Subtract mean from each column\n  for (i in seq_along(means)) {\n    data1[, names(data1) != \"id\"][, i] &lt;- data1[, names(data1) != \"id\"][, i] - means[i]\n  }\n})\n\nhtmlwidgets::saveWidget(pv, \"profvis-slow-code.html\")\n\n# In interactive mode, we can directly view the profiling results\nif (interactive())\n  print(pv)\n\n\n\nCan you identify where is the bottleneck in the code? What would you do to speed it up?"
-  },
-  {
-    "objectID": "profiling.html#footnotes",
-    "href": "profiling.html#footnotes",
-    "title": "Profiling",
-    "section": "Footnotes",
-    "text": "Footnotes\n\n\nCode copied verbatim from the profvis R package here.↩︎"
-  },
-  {
-    "objectID": "profiling.html#a-proposed-workflow",
-    "href": "profiling.html#a-proposed-workflow",
-    "title": "Profiling",
-    "section": "A proposed workflow",
-    "text": "A proposed workflow\nHere is a formula to follow when doing code profiling/optimization:\n\nAsk yourself these questions before you jump into profiling:\n\n\n\n\n\n\nflowchart LR\n  A((Start))--&gt;B{Is it&lt;br&gt;slow?}\n  B--&gt;|Yes|C{Are you&lt;br&gt;sure?}\n  B--&gt;|Not really, it&lt;br&gt;just sounds cool...|D((End))\n  C--&gt;|Maybe...|E{Takes more&lt;br&gt;than 1min?}\n\n  C--&gt;|Yes|F{Is it&lt;br&gt;worth it?}\n  E--&gt;|Yes|F\n  E--&gt;|No|D\n\n  F--&gt;|No, I'm&lt;br&gt;just bored&lt;br&gt;|D\n  F--&gt;|Yes, my life&lt;br&gt;depends on it|G((Proceed with&lt;br&gt;optimization))\n\n\n\n\n\n\n\nIf you succeed, then ensure that the profiling is done in a finite time, this is, use a subset of the data to avoid having long waits. Running the profiler will add overhead computing time, so try to keep it short (e.g., 1 minute).\nThere may be many things that could be optimized, focus on what would deliver the highest impact. Could be a function that is only called once but takes a long time to execute, or a function that is called multiple times but is relatively fast.\nBefore making any changes, ensure that you have a backup of your original code, as well as a copy of the current profiling results.\nRe-run the profiler and compare performance. If no changes are observed, then go back to step 2."
-  },
-  {
-    "objectID": "program.html#plan",
-    "href": "program.html#plan",
-    "title": "Program",
-    "section": "Plan",
-    "text": "Plan\nThe first hour and a half of the workshop will cover the following topics:\n\nProfiling (Profiling)\nWriting efficient code (Efficiency)\nThe data.table package (Data.Table)\nParallel computing in R (Parallel computing in R and the parallel package)\n\nThe last hour will be dedicated to looking into the participants’ specific use cases and challenges, providing tailored advice and solutions. Much of the content will be driven by the participants’ needs and questions, and due to the time constraints, we will most likely skip some sections of the lectures."
-  },
-  {
-    "objectID": "efficiency.html",
-    "href": "efficiency.html",
-    "title": "Writing efficient code",
-    "section": "",
-    "text": "R code can be very efficient for typical tasks, but, as the code starts to increase in complexity, it is easy for it to become inefficient.\nSome quick R tips for efficient computing code:\n\nUse vectorized operations instead of loops.\nTry to use caching to avoid repeated calculations. Caching can also be done out of memory!\nAvoid unnecessary steps/data processing.\nReduce the number of copy operations.\nForeSITE"
-  },
-  {
-    "objectID": "efficiency.html#vectorized-operations",
-    "href": "efficiency.html#vectorized-operations",
-    "title": "Writing efficient code",
-    "section": "Vectorized Operations",
-    "text": "Vectorized Operations\nVectorization can mean many things in programming, but in R, vectorization refers to using functions over vectors. For instance, instead of using a loop to add two vectors together, you can use the + operator directly on the vectors:\n\n# Using a loop\nset.seed(331)\na &lt;- runif(1e3)\nb &lt;- runif(1e3)\nresult &lt;- numeric(length(a))\nfor (i in seq_along(a)) {\n  result[i] &lt;- a[i] + b[i]\n}\n\n# Using vectorized operation\nresult &lt;- a + b\n\nWe can even bechmark the performance of these two approaches:\n\nlibrary(microbenchmark)\nmicrobenchmark(\n  loop = {\n    result &lt;- numeric(length(a))\n    for (i in seq_along(a)) {\n      result[i] &lt;- a[i] + b[i]\n    }\n  },\n  vectorized = {\n    result &lt;- a + b\n  },\n  unit = \"relative\"\n)\n\nUnit: relative\n       expr  min       lq     mean   median       uq      max neval\n       loop 4374 1724.909 1231.412 1494.423 1094.216 518.7375   100\n vectorized    1    1.000    1.000    1.000    1.000   1.0000   100\n\n\n\n\n\n\n\n\nTip\n\n\n\nFor-loops are not always bad. The main issue is with the code inside of the for-loop. If the code is already vectorized, then there’s no need to remove the for-loop (unless you can vectorize the for-loop itself)."
-  },
-  {
-    "objectID": "efficiency.html#caching-calculations",
-    "href": "efficiency.html#caching-calculations",
-    "title": "Writing efficient code",
-    "section": "Caching calculations",
-    "text": "Caching calculations\nMany times, it is useful to cache calculations that are expensive to compute. For instance, if you have a function that takes a long time to run, you can store the result in a variable and reuse it later instead of recalculating it.\nHere is a bad example using the Fibonacci sequence:\n\nfibonacci &lt;- function(n) {\n  if (n &lt;= 1) {\n    return(n)\n  }\n  return(fibonacci(n - 1) + fibonacci(n - 2))\n}\n\nfibonacci_cached &lt;- function(n) {\n  prev &lt;- numeric(n + 1)\n  for (i in seq_len(n)) {\n    if (i &lt;= 1) {\n      prev[i + 1] &lt;- i\n    } else {\n      prev[i + 1] &lt;- prev[i] + prev[i - 1]\n    }\n  }\n\n  return(prev[n + 1])\n}\n\nBoth of these functions should return the same result, but the second is significantly faster as it avoids calling the function recursively:\n\nmicrobenchmark(\n  fibonacci(10),\n  fibonacci_cached(10),\n  times = 10,\n  unit = \"relative\",\n  check = \"equal\"\n)\n\nUnit: relative\n                 expr   min       lq     mean   median uq      max neval\n        fibonacci(10) 26.35 25.47619 19.34752 24.15556 23 7.227848    10\n fibonacci_cached(10)  1.00  1.00000  1.00000  1.00000  1 1.000000    10"
-  },
-  {
-    "objectID": "efficiency.html#caching-calculations-bis",
-    "href": "efficiency.html#caching-calculations-bis",
-    "title": "Writing efficient code",
-    "section": "Caching calculations (bis)",
-    "text": "Caching calculations (bis)\nIn the case of large calculations, we can also save results to the disk. For example, if we are running a simulation/computation, one per city/scenario, we can save the results to a file and read them later. Here is how to do it:\nFor each value of i, do the following:\n\nCheck if the file result_i.rds exists.\nIf it does not exist, run the computation and save the result to result_i.rds.\nIf it does exist, read the result from result_i.rds.\n\nAs simple as that! Here is an example using R code:\n\n# A complicated simulation function\nsimulate &lt;- function(i, seed) {\n  set.seed(seed)\n  rnorm(1e5)\n}\n\n# Generating seeds for each iteration\nset.seed(331)\nnsims &lt;- 100\nseeds &lt;- sample.int(.Machine$integer.max, nsims)\n\n# Just for this example, we will use a tempfile\nres_0 &lt;- vector(\"list\", length = nsims)\nfor (i in seq_len(nsims)) {\n  \n  # Creating the filename\n  fn &lt;- file.path(tempdir(), paste0(i, \".rds\"))\n\n  # Does the result already exist?\n  if (file.exists(fn))\n    res_0[[i]] &lt;- readRDS(fn)\n  else {\n    # If not, run the simulation and save the result\n    res_0[[i]] &lt;- simulate(i, seed = i)\n    saveRDS(res_0[[i]], fn)\n  }\n\n}\n\n\n\n\n\n\n\nTip\n\n\n\nWhen running simulations, it is a good pracitice to set individual seeds for each simulation (if these are individually complex). That way, if the code fails, you can rerun only the failed simulations without having to redo all of them.\n\n\nFurthermore, it is a good idea to wrap your code in a tryCatch() call to handle errors gracefully. This way, if a simulation fails, you can log the error and continue with the next simulation without stopping the entire process.\n\n# Just for this example, we will use a tempfile\nres_0 &lt;- vector(\"list\", length = nsims)\nfor (i in seq_len(nsims)) {\n  \n  # Creating the filename\n  fn &lt;- file.path(tempdir(), paste0(i, \".rds\"))\n\n  # Does the result already exist?\n  res &lt;- tryCatch({\n    if (file.exists(fn))\n      readRDS(fn)\n    else {\n      # If not, run the simulation and save the result\n      ans_i &lt;- simulate(i, seed = i)\n      saveRDS(ans_i, fn)\n      ans_i\n    }\n  }, error = function(e) e)\n\n  if (inherits(res, \"error\")) {\n    message(\"Simulation \", i, \" failed: \", res$message)\n    next  # Skip to the next iteration\n  }\n\n  # We still store it, even if it failed\n  res_0[[i]] &lt;- res\n\n}"
-  },
-  {
-    "objectID": "efficiency.html#avoiding-unnecessary-steps",
-    "href": "efficiency.html#avoiding-unnecessary-steps",
-    "title": "Writing efficient code",
-    "section": "Avoiding unnecessary steps",
-    "text": "Avoiding unnecessary steps\nMany times, we can find shortcuts to reduce the amount of data processing we need to do. A great example is in the linear regression function lm(). The lm() function will go beyond finding the coefficients in a linear model, it will also compute residuals, fitted values, and more. Instead, we can use the function lm.fit() which only computes the coefficients:\n\nset.seed(331)\nx &lt;- rnorm(2e3)\ny &lt;- 2 + 3 * x + rnorm(2e3)\n\n# Comparing\nmicrobenchmark(\n  lm = coef(lm(y ~ x)),\n  lm_fit = coef(lm.fit(cbind(1, x), y)),\n  times = 10,\n  unit = \"relative\"\n)\n\nUnit: relative\n   expr      min       lq     mean   median       uq      max neval\n     lm 3.848261 3.706667 4.988114 3.578396 3.767868 12.80968    10\n lm_fit 1.000000 1.000000 1.000000 1.000000 1.000000  1.00000    10"
-  },
-  {
-    "objectID": "efficiency.html#reducing-copy-operations",
-    "href": "efficiency.html#reducing-copy-operations",
-    "title": "Writing efficient code",
-    "section": "Reducing copy operations",
-    "text": "Reducing copy operations\nLike in any programming language, copy operations in R can be expensive. Beyond increasing the amount of memory used, copy operations require tme to allocate memory and then copy the data. Modern R minimizes these by using copy-on-modify. This means that R will not copy an object until it is modified. For example, the following code makes multiple copies of X, but it is until the last line that R actually makes a copy of X:\n\nset.seed(331)\nX &lt;- runif(1e4)\nY &lt;- X\nZ &lt;- X\n\n# Checking the address of the objects\nlibrary(lobstr)\nobj_addr(X)\n## [1] \"0x1318b8000\"\nobj_addr(Y)\n## [1] \"0x1318b8000\"\nobj_addr(Z)\n## [1] \"0x1318b8000\"\n\nModifying X will trigger a copy operation, and the addresses of Y and Z will remain the same, while X will have a new address:\n\n# Modifying X\nX[1] &lt;- 100  # This is when R makes a copy of X\nobj_addr(X)\n## [1] \"0x121d20000\"\nobj_addr(Y)\n## [1] \"0x1318b8000\"\nobj_addr(Z)\n## [1] \"0x1318b8000\""
   }
 ]
