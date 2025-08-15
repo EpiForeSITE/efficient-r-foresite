@@ -183,6 +183,72 @@ for (i in seq_len(nsims)) {
 }
 ```
 
+::: {.callout-tip}
+The `saveRDS` function in R uses the `compress = TRUE` argument as default. Compressing the data for saving space is generally a good idea, but not if you need to read data fast. So, if space is not a constraint, you can set `compress = FALSE` when saving the RDS file to accelerate the reading process.
+:::
+
+## Caching calculations in a ShinyApp
+
+Below is an example of a plotly figure that is pre-recorded for a shiny app. The idea is that, if the figure does not need to be reactive, you can always pre-compute the results and store them on a file, in this case, as an HTML file:
+
+```r
+library(shiny)
+library(bslib)
+library(plotly)
+ 
+# Like we did with the simulations, we have a default filename
+fn <- "plotly.html"
+ 
+# Notice I'm adding the www because, outside of the
+# server call, this writes directly to the top level.
+# Once reading, it will read from www.
+if (!file.exists(file.path("www", fn))) {
+ 
+  message("Creating the file...")
+ 
+  # if it doesn't exist, then it creates it and saves it
+  p <- plot_ly(x = 1:10, y = 1:10) %>% add_lines()
+  htmlwidgets::saveWidget(
+    p,
+    file = "www/plotly.html",
+    selfcontained = TRUE
+    )
+} else {
+  message("The file already exists!")
+}
+ 
+ 
+# Define UI for app that draws a histogram ----
+ui <- page_sidebar(
+  # App title ----
+  title = "Hello Shiny!",
+  # Sidebar panel for inputs ----
+  sidebar = sidebar(
+    # Input: Slider for the number of bins ----
+    sliderInput(
+      inputId = "bins",
+      label = "Number of bins:",
+      min = 1,
+      max = 50,
+      value = 30
+    )
+  ),
+  htmlOutput(outputId = "plotlyOutput")
+)
+ 
+server <- function(input, output) {
+ 
+  output$plotlyOutput <- renderUI({
+    tags$iframe(
+      src = "plotly.html"
+    )
+  })
+ 
+}
+ 
+shinyApp(ui = ui, server = server)
+```
+
 ## Avoiding unnecessary steps
 
 Many times, we can find shortcuts to reduce the amount of data processing we need to do. A great example is in the linear regression function `lm()`. The `lm()` function will go beyond finding the coefficients in a linear model, it will also compute residuals, fitted values, and more. Instead, we can use the function `lm.fit()` which only computes the coefficients:

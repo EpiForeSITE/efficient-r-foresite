@@ -1,14 +1,14 @@
 ---
 title: "Program"
 date: 2025-07-09
-date-modified: 2025-07-09
+date-modified: 2025-08-15
 ---
 
 This half-day workshop will focus on practical techniques for writing efficient R code. Participants will learn about vectorization, parallel computing, and specialized packages to dramatically improve their R code performance. The session will include hands-on exercises and real-world examples.
 
 ## Plan
 
-The first hour and a half of the workshop will cover the following topics:
+The first two hours of the workshop will cover the following topics:
 
 1. Profiling ([Profiling](profiling.qmd))
 

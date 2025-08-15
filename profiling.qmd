@@ -44,9 +44,9 @@ flowchart LR
 
 3. There may be many things that could be optimized, focus on what would deliver the highest impact. Could be a function that is only called once but takes a long time to execute, or a function that is called multiple times but is relatively fast.
 
-4. Before making any changes, ensure that you have a backup of your original code, as well as a copy of the current profiling results.
+4. Before making any changes, ensure that you have a backup of your original code, as well as a copy of the current profiling results. **You should also ensure to save (if possible) the outcome of the code.**
 
-5. Re-run the profiler and compare performance. If no changes are observed, then go back to step 2.
+5. Re-run the profiler and compare performance. If no changes are observed, then go back to step 2. **Ensure the new version of the code maintains the same functionality as the original (check the results).**
 
 ## Profiling code in R
 

@@ -284,8 +284,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <ol start="2" type="1">
 <li><p>If you succeed, then ensure that the profiling is done in a finite time, this is, use a subset of the data to avoid having long waits. <strong>Running the profiler will add overhead computing time, so try to keep it short (e.g., 1 minute)</strong>.</p></li>
 <li><p>There may be many things that could be optimized, focus on what would deliver the highest impact. Could be a function that is only called once but takes a long time to execute, or a function that is called multiple times but is relatively fast.</p></li>
-<li><p>Before making any changes, ensure that you have a backup of your original code, as well as a copy of the current profiling results.</p></li>
-<li><p>Re-run the profiler and compare performance. If no changes are observed, then go back to step 2.</p></li>
+<li><p>Before making any changes, ensure that you have a backup of your original code, as well as a copy of the current profiling results. <strong>You should also ensure to save (if possible) the outcome of the code.</strong></p></li>
+<li><p>Re-run the profiler and compare performance. If no changes are observed, then go back to step 2. <strong>Ensure the new version of the code maintains the same functionality as the original (check the results).</strong></p></li>
 </ol>
 </section>
 <section id="profiling-code-in-r" class="level2">
