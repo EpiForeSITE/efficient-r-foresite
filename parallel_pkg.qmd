@@ -2,6 +2,9 @@
 title: The parallel R package
 author: George G. Vega Yon, Ph.D.
 date: 2025-08-14
+date-modified: 2025-08-18
+mermaid: 
+  theme: neutral
 ---
 
 ::: {.callout-note}
@@ -12,23 +15,37 @@ Although R was not built for parallel computing, multiple ways of parallelizing 
 
 ## Parallel workflow
 
+```{mermaid}
+flowchart LR
+  start((Start)) --> one["`Create<br>a cluster`"]
+  one --> two
+  subgraph two[Prepare the session]
+    direction TB
+    copy[Copy objects]~~~eval[Evaluate<br>expressions]
+    eval~~~seed[Set seed]
+  end
+
+  two --> three[Do your<br>call]
+  three --> four[Stop the<br>cluster]
+```
+
 (Usually) We do the following:
 
-1.  Create a `PSOCK/FORK` (or other) cluster using `makePSOCKCluster`/`makeForkCluster`
-    (or `makeCluster`)
-    
+1.  Create a `PSOCK/FORK` (or other) cluster using `makePSOCKCluster`/`makeForkCluster` (or `makeCluster`). How many child processes will depend on how many threads your computer has. A rule of thumb is to use `parallel::detectCores() - 1` cores (so you leave one free for the rest of your computer).
+
 2.  Copy/prepare each R session (if you are using a `PSOCK` cluster):
 
-    a.  Copy objects with `clusterExport`
+    a.  Copy objects with `clusterExport`. This would be all the objects that you need in the child sessions.
 
-    b.  Pass expressions with `clusterEvalQ`
+    b.  Pass expressions with `clusterEvalQ`. This would include loading R packages and other code into the other sessions.
 
-    c.  Set a seed
+    c.  Set a seed (if you are doing something that involves randomness)
 
 3.  Do your call: `parApply`, `parLapply`, etc. 
 
 4.  Stop the cluster with `clusterStop`
 
+As we mention later, step 2 will depend on the type of cluster you are using. If you are using a Socket connection (`PSOCK` cluster), then the spawned R sessions will be completely, fresh (no data or R packages pre-loaded); whereas using a Fork connection (`FORK` cluster) will copy the current R session, including all objects and loaded packages.
 
 ## Types of clusters: PSOCK
 
@@ -58,11 +75,63 @@ Although R was not built for parallel computing, multiple ways of parallelizing 
 
 -   Not available on Windows.
 
-Other `makeCluster`: passed to [**snow**](https://cran.r-project.org/package=snow)
-(Simple Network of Workstations)
+Other types are available via the function `makeCluster` from the [**snow**](https://cran.r-project.org/package=snow) R package
+(Simple Network of Workstations). These include MPI (Message Passing Interface) clusters and Slurm (Socket) clusters.
 
 
-## Ex 1: Parallel RNG with `makePSOCKCluster`
+## A template program
+
+The following code chunk shows a template for using the `parallel` package in R. You can copy this and comment the bits that you don't need:
+
+```r
+library(parallel)
+
+# 1. CREATING A CLUSTER ----------------
+nnodes <- 4L # Could be less or more!
+cl <- makePSOCKcluster(nnodes)
+
+# 2. PREPARING THE CLUSTER -------------
+
+# Mostly if using PSOCK
+clusterEvalQ(cl, {
+  library(...) # Loading the necesary packages
+  source(...) # Source additional scripts
+})
+
+# Always if you are doing random numbers
+clusterSetRNGStream(cl, 123)
+
+# 3. DO YOUR CALL ----------------------
+ans <- parLapply(
+  cl,
+  ... long list to iterate ...,
+  function(x) {
+    ...
+  },
+  ... further arguments ...
+  )
+
+# 4. STOP THE CLUSTER
+stopCluster(cl)
+```
+
+Generally, the `... long list to iterate ...` will be a vector or another list that contains either data (e.g., individual datasets), a sequence of numbers (e.g., from 1 to 1000), a list of file paths (if you were processing files individually), or directly a short sequence with numbers from 1 to the number of nodes (least common application).
+
+When calling `parLapply` or `parSapply` (the parallel versions of `lapply` and `sapply` respectively), the function call will automatically split the iterations across nodes using the `splitIndices` function. Here is an example of what happens under the hood:
+
+```{r}
+#| label: cluster-split
+# Distributing 9 iterations across two cores
+(n_iterations <- parallel::splitIndices(nx = 9, ncl = 2))
+```
+
+Which means that the first R session will get `r length(n_iterations[[1]])` jobs, wereas the second R session will get `r length(n_iterations[[2]])` jobs. This way, each spawned R session (child session) gets to do a similiar number of iterations.
+
+## Examples 
+
+The following three examples are a simple application of the package in which we are explicitly running as many replications as threads the cluster has. Generally, the number of replicates will be a function of the data.
+
+### Ex 1: Parallel RNG with `makePSOCKCluster`
 
 ::: {.callout-caution}
 Using more threads than cores available on your computer is never a good idea. As a rule of thumb, clusters should be created using `parallel::detectCores() - 1` cores (so you leave one free for the rest of your computer.)
@@ -91,7 +160,7 @@ stopCluster(cl)
 all.equal(ans0, ans1) # All equal!
 ```
 
-## Ex 2: Parallel RNG with `makeForkCluster`
+### Ex 2: Parallel RNG with `makeForkCluster`
 
 In the case of `makeForkCluster`
 
@@ -127,7 +196,7 @@ stopCluster(cl)
 <text style="color:white;">Well, if you are a Mac-OS/Linux user, there's a more straightforward way of doing this...</text>
 
 
-## Ex 3: Parallel RNG with `mclapply` (Forking on the fly)
+### Ex 3: Parallel RNG with `mclapply` (Forking on the fly)
 
 In the case of `mclapply`, the forking (cluster creation) is done on the fly!
 
