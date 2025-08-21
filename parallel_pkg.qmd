@@ -127,7 +127,157 @@ When calling `parLapply` or `parSapply` (the parallel versions of `lapply` and `
 
 Which means that the first R session will get `r length(n_iterations[[1]])` jobs, wereas the second R session will get `r length(n_iterations[[2]])` jobs. This way, each spawned R session (child session) gets to do a similiar number of iterations.
 
-## Examples 
+## Example: Running a linear regression across multiple columns
+
+In genomics, it is common to analyze genomic data at the gene level comparing expression levels against some phenotype/disease. A simple analysis consists of running a linear regression across multiple columns (genes) of a data frame. The following code-block generates some artificial data we can use for this example:
+
+```{r}
+#| label: omics-data
+set.seed(331)
+n_genes <- 10000
+n_obs <- 1000
+
+# A random matrix of omics
+X_genes <- rnorm(n_obs * n_genes) |>
+  matrix(nrow = n_obs)
+
+# A random phenotype (completely unrelated for this example)
+Y <- rnorm(n_obs) |> cbind()
+```
+
+We will wrap the analysis into a function so we can do benchmarking. We will use the `lapply` function to iterate over the columns of `X_genes`
+
+```{r}
+#| label: omics-lapply
+ols_serial <- function(X, Y) {
+  lapply(
+    X = seq_len(n_genes),
+    FUN = \(i) {lm.fit(X[, i, drop = FALSE], Y) |> coef()}
+  ) |> do.call(what = rbind)
+}
+
+# Calling the function and looking at the first few rows
+ols_serial(X_genes, Y) |> head()
+```
+
+::: {.callout-tip}
+Like we did in the efficient programming section, instead of using `lm()` or `glm()`, we can use `lm.fit()` for better performance. The `lm.fit()` function does less than the `lm()` function by skipping computing residuals and other overhead, making it faster for large datasets.
+:::
+
+Using parallel computing (and following the template we presented earlier), this could be done in the following way with the parallel package:
+
+```{r}
+#| label: omics-parlapply
+library(parallel)
+
+ols_parallel <- function(X, Y, ncores) {
+  # 1. CREATING A CLUSTER ----------------
+  cl <- makePSOCKcluster(ncores)
+  
+  # This will be called when exiting the function
+  on.exit(stopCluster(cl)) 
+
+  # 2. PREPARING THE CLUSTER -------------
+  # We copy the data over
+  clusterExport(cl, c("X", "Y"), envir = environment())
+
+  # 3. DO YOUR CALL ----------------------
+  parLapply(
+    cl,
+    seq_len(n_genes),
+    function(i) {
+      lm.fit(X[, i, drop = FALSE], Y) |> coef()
+    }
+  ) |> do.call(what = rbind)
+}
+
+# Checking it works
+ols_parallel(X_genes, Y, ncores = 4L) |> head()
+```
+
+::: {.callout-tip}
+Just like the `return()`, `on.exit()` can only be used within a function call. We could have used `stopCluster(cl)` at the end as we do in our template example, but the benefit of using `on.exit()` is that it will be called automatically when the function exits, even if an error occurs. This helps to ensure that the cluster is always stopped properly.
+:::
+
+Now that we have the function implemented, we can go ahead and (1) compare results and (2) measure performance.
+
+```{r}
+#| label: omics-bench1
+#| cache: true
+library(microbenchmark)
+
+microbenchmark(
+  serial = ols_serial(X_genes, Y),
+  parallel = ols_parallel(X_genes, Y, ncores = 4L),
+  times = 10L,
+  check = "identical"
+)
+```
+
+From the comparison, we can see that the parallel version is significantly slower than the serial version. Two things to note here are (a) the task we are running is already fast (about 0.3 seconds on average for the serial run) and (b) there is an overhead cost associated with creating, preparing, and stopping the cluster. As we mentioned earlier, parallel optimizations only make sense if your code is already talking a significant amount of time, making the overhead cost associated with the setup relatively small. The following implementation of the function should make it significantly faster:
+
+```{r}
+#| label: omics-parlapply2
+ols_parallel2 <- function(cl) {
+  # 1. CREATING A CLUSTER ----------------
+  # 2. PREPARING THE CLUSTER -------------
+  # No need anymore as we are handling the core outside
+
+  # 3. DO YOUR CALL ----------------------
+  parLapply(
+    cl,
+    seq_len(n_genes),
+    function(i) {
+      lm.fit(X_genes[, i, drop = FALSE], Y) |> coef()
+    }
+  ) |> do.call(what = rbind)
+}
+
+# Checking it works
+cl <- makePSOCKcluster(4)
+clusterExport(cl, c("X_genes", "Y"))
+ols_parallel2(cl) |> head()
+
+# 4. STOP THE CLUSTER
+stopCluster(cl)
+```
+
+The main differences from the previous version of the function are:
+
+1. We are creating the cluster outside of the function and passing it as an argument.
+
+2. We are exporting the `X_genes` and `Y` variables to the cluster only once, which should also reduce overhead significantly.
+
+3. Because of the previous step, we are now calling `X_genes` directly in the main function.
+
+4. The cluster is stopped outside of the function call (since the function no longer manages the cluster object).
+
+
+Let's measure the performance to see how much faster the parallel version is.
+
+```{r}
+#| label: omics-bench2
+#| cache: true
+library(microbenchmark)
+
+# We need to prepare the cluster before hand
+cl <- makePSOCKcluster(4)
+clusterExport(cl, c("X_genes", "Y"))
+
+microbenchmark(
+  serial = ols_serial(X_genes, Y),
+  parallel = ols_parallel2(cl),
+  times = 10L,
+  check = "identical"
+)
+
+# We need to stop the cluster
+stopCluster(cl)
+```
+
+Now, the parallel version is significantly faster than the serial version. Just using the parallel package (or any other package that can be used for parallel computing) does not guarantee improved performance.
+
+## More examples
 
 The following three examples are a simple application of the package in which we are explicitly running as many replications as threads the cluster has. Generally, the number of replicates will be a function of the data.
 
